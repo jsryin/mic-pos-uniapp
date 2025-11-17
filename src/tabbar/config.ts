@@ -53,6 +53,27 @@ export const customTabbarList: CustomTabBarItem[] = [
     // badge: 'dot',
   },
   {
+    text: '%tabbar.order%',
+    pagePath: 'pages/order/order',
+    iconType: 'unocss',
+    icon: 'i-carbon-shopping-bag',
+    // badge: 'dot',
+  },
+  {
+    text: '%tabbar.pickup%',
+    pagePath: 'pages/pickup/pickup',
+    iconType: 'unocss',
+    icon: 'i-carbon-delivery',
+    // badge: 'dot',
+  },
+  {
+    text: '%tabbar.me%',
+    pagePath: 'pages/me/index',
+    iconType: 'unocss',
+    icon: 'i-carbon-user',
+    // badge: 'dot',
+  },
+  {
     pagePath: 'pages/me/me',
     text: '%tabbar.me%',
     iconType: 'unocss',

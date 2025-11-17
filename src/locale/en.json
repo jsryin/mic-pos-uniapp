@@ -1,6 +1,7 @@
 {
   "tabbar.home": "Home",
-  "tabbar.about": "About",
+  "tabbar.order": "Order",
+  "tabbar.pickup": "Pickup",
   "tabbar.me": "Me",
   "i18n.title": "En Title",
   "alova.title": "Alova Request",

@@ -19,6 +19,8 @@ export default uniHelper({
     'src/manifest.json',
     // 忽略自动生成文件
     'src/service/**',
+    // 忽略静态资源文件
+    '**/*.{jpg,jpeg,png,gif,svg,webp,ico,mp4,mp3,wav}',
   ],
   // https://eslint-config.antfu.me/rules
   rules: {
