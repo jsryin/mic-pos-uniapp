@@ -18,6 +18,7 @@
       :user-points="userPoints"
       @pickup-order="handlePickupOrder"
       @delivery-order="handleDeliveryOrder"
+      @show-login="handleShowLogin"
     />
 
     <!-- 功能图标区域 -->
@@ -31,7 +32,14 @@
       tag-text="会员活动"
       title-text="会员活动专区"
       subtitle-text="Get优惠的饮茶攻略"
-      @activity-click="handleMemberActivity"
+      @activity-click="handleMemberActivityAction"
+    />
+
+    <!-- 全局登录弹窗 -->
+    <LoginPopup
+      v-model="showLoginPopup"
+      :on-success="handleLoginSuccess"
+      @close="hideLogin"
     />
   </view>
 </template>
@@ -39,6 +47,9 @@
 <script setup lang="ts">
 import type { FunctionItem } from './components'
 import { ref } from 'vue'
+// 引入登录弹窗
+import { useLoginPopup, withLoginCheck } from '@/hooks/useLoginPopup'
+import { useTokenStore } from '@/store/token'
 // 引入组件
 import { FunctionMenu, MemberActivity, UserCard } from './components'
 // 引入样式
@@ -50,6 +61,10 @@ definePage({
   navigationBarBackgroundColor: '#ffffff',
   navigationBarTextStyle: 'black',
 })
+
+// 登录相关
+const tokenStore = useTokenStore()
+const { showLoginPopup, showLogin, hideLogin, handleLoginSuccess } = useLoginPopup()
 
 // 响应式数据
 const couponCount = ref(3)
@@ -87,50 +102,64 @@ const functionItems = ref<FunctionItem[]>([
   },
 ])
 
-// 事件处理方法
-function handlePickupOrder() {
+// 需要登录的操作（使用登录检查装饰器）
+const handlePickupOrder = withLoginCheck(() => {
   uni.navigateTo({
     url: '/pages/pickup/pickup',
   })
-}
+})
 
-function handleDeliveryOrder() {
+const handleDeliveryOrder = withLoginCheck(() => {
   uni.navigateTo({
     url: '/pages/order/order',
   })
-}
+})
 
+// 需要登录的功能点击（使用登录检查装饰器）
+const handleInviteAction = withLoginCheck(() => {
+  uni.showToast({
+    title: '邀请有礼功能开发中',
+    icon: 'none',
+  })
+})
+
+const handlePointsMallAction = withLoginCheck(() => {
+  uni.showToast({
+    title: '积分商城功能开发中',
+    icon: 'none',
+  })
+})
+
+const handleCupCollectionAction = withLoginCheck(() => {
+  uni.showToast({
+    title: '集杯有礼功能开发中',
+    icon: 'none',
+  })
+})
+
+const handleCommunityAction = withLoginCheck(() => {
+  uni.showToast({
+    title: '茶友社群功能开发中',
+    icon: 'none',
+  })
+})
+
+// 处理功能点击
 function handleFunctionClick(item: FunctionItem) {
   console.log('点击功能项:', item)
 
   switch (item.action) {
     case 'invite':
-      // 处理邀请有礼
-      uni.showToast({
-        title: '邀请有礼功能开发中',
-        icon: 'none',
-      })
+      handleInviteAction()
       break
     case 'points-mall':
-      // 处理积分商城
-      uni.showToast({
-        title: '积分商城功能开发中',
-        icon: 'none',
-      })
+      handlePointsMallAction()
       break
     case 'cup-collection':
-      // 处理集杯有礼
-      uni.showToast({
-        title: '集杯有礼功能开发中',
-        icon: 'none',
-      })
+      handleCupCollectionAction()
       break
     case 'community':
-      // 处理茶友社群
-      uni.showToast({
-        title: '茶友社群功能开发中',
-        icon: 'none',
-      })
+      handleCommunityAction()
       break
     default:
       if (item.route) {
@@ -141,11 +170,29 @@ function handleFunctionClick(item: FunctionItem) {
   }
 }
 
-function handleMemberActivity() {
+// 会员活动（需要登录）
+const handleMemberActivityAction = withLoginCheck(() => {
   uni.showToast({
     title: '会员活动功能开发中',
     icon: 'none',
   })
+})
+
+// 显示登录弹窗
+function handleShowLogin() {
+  showLogin(
+    // 登录成功后的回调
+    () => {
+      uni.showToast({
+        title: '登录成功',
+        icon: 'success',
+      })
+    },
+    // 关闭弹窗的回调
+    () => {
+      console.log('用户关闭了登录弹窗')
+    },
+  )
 }
 
 // 页面生命周期

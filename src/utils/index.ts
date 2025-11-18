@@ -124,8 +124,10 @@ export function getCurrentPageI18nKey() {
     }
   }
   console.log(currPage)
-  console.log(currPage.style.navigationBarTitleText)
-  return currPage.style?.navigationBarTitleText || ''
+  // 处理两种配置方式：直接在根级别或在style对象内
+  const titleText = currPage.style?.navigationBarTitleText || currPage.navigationBarTitleText || ''
+  console.log(titleText)
+  return titleText
 }
 
 export function isCurrentPageTabbar() {
