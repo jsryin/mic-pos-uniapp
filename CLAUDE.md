@@ -6,6 +6,8 @@
 
 **全部使用中文回复**：在此代码仓库中工作时，Claude 必须使用中文进行所有回复和交流。这包括代码注释、文档说明、问题解答和技术讨论等所有形式的沟通。
 
+**优先使用 wot-design-uni**：在开发过程中，优先使用 wot-design-uni 组件库的组件。该组件库已在 pages.config.ts 中配置了 easycom 自动导入规则（'^wd-(.*)': 'wot-design-uni/components/wd-$1/wd-$1.vue'），可以直接使用 `wd-` 前缀的组件，如 `wd-button`、`wd-input`、`wd-picker` 等。
+
 # unibest 项目概览
 
 基于 uniapp + Vue3 + TypeScript + Vite5 + UnoCSS 的跨平台开发框架，支持 H5、小程序、APP 多平台开发。
@@ -14,6 +16,7 @@
 - 最新前端技术栈，内置约定式路由、layout布局、请求封装
 - 无需依赖 HBuilderX，支持命令行开发
 - 严格 TypeScript 开发，使用 Composition API
+- 集成 wot-design-uni、z-paging 等优秀的第三方组件库
 
 ## 核心配置
 - `package.json` - 依赖和脚本
@@ -68,10 +71,18 @@ src/
 - **UnoCSS**: 原子化 CSS，优先使用预设类名，配置在 `uno.config.ts`
 - **SCSS**: 使用 `scoped` 属性，遵循 BEM 规范
 
+## UI 组件库使用
+- **wot-design-uni**: 主要UI组件库，已配置easycom自动导入
+  - 组件前缀: `wd-` (如 `wd-button`, `wd-input`, `wd-picker`)
+  - 主要用于微信小程序，支持多平台
+  - 完整的组件列表和文档参考 wot-design-uni 官方文档
+- **z-paging**: 分页组件，用于列表和分页功能
+- **UnoCSS图标**: 支持 Carbon 图标集合，使用 `i-` 前缀
+
 ## 平台适配
 - 使用条件编译 `#ifdef/#endif` 处理平台差异
 - 优先使用 `uni.xxx` API 替代原生 API
-- 支持第三方组件库: wot-ui、uview-plus、z-paging 等
+- wot-design-uni 在各平台的兼容性可能有所不同，开发时注意测试
 
 ## 生命周期
 - **页面**: onLoad、onShow、onReady、onHide、onUnload

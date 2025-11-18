@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(\"D:\\myWork\\vueWork\\mic-pos-uniapp\\src\\static\\placeholder-food.jpg\")",
+      "Bash(pnpm dev:*)"
     ],
     "deny": [],
     "ask": []
