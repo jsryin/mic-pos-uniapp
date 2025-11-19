@@ -3,12 +3,6 @@
     <view class="user-header">
       <view class="greeting-section">
         <text class="user-greeting">Hi, {{ userNickname }}</text>
-        <view class="login-status">
-          <text v-if="hasLogin" class="status-text logged-in">已登录</text>
-          <text v-else class="status-text not-logged-in" @click="$emit('show-login')">
-            点击登录
-          </text>
-        </view>
       </view>
       <view class="user-stats">
         <view class="stat-item">
@@ -44,7 +38,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useTokenStore } from '@/store/token'
 import { useUserStore } from '@/store/user'
 
 // 组件 Props 定义
@@ -62,20 +55,14 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   'pickup-order': []
   'delivery-order': []
-  'show-login': []
 }>()
 
 // 状态管理
 const userStore = useUserStore()
-const tokenStore = useTokenStore()
 
 // 计算属性
 const userNickname = computed(() => {
   return userStore.userInfo.nickname || userStore.userInfo.username || '微信用户'
-})
-
-const hasLogin = computed(() => {
-  return tokenStore.hasLogin
 })
 </script>
 
@@ -94,24 +81,6 @@ const hasLogin = computed(() => {
 
 .user-greeting {
   @apply text-xl font-bold;
-}
-
-.login-status {
-  .status-text {
-    @apply text-sm px-3 py-1 rounded-full;
-
-    &.logged-in {
-      @apply bg-green-100 text-green-600;
-    }
-
-    &.not-logged-in {
-      @apply bg-orange-100 text-orange-600;
-
-      &:active {
-        @apply opacity-80 transition-opacity;
-      }
-    }
-  }
 }
 
 .user-stats {

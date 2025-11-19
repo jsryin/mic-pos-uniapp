@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useTokenStore } from '@/store/token'
 
 interface Props {
@@ -22,11 +22,15 @@ const emit = defineEmits<Emits>()
 
 const tokenStore = useTokenStore()
 
-// 表单数据
-const phoneNumber = ref('')
-const referralCode = ref('')
-const countryCodeIndex = ref(0)
-const countryCodes = ref(['+86', '+1', '+44'])
+// 表单ref
+const form = ref()
+
+// 表单数据模型
+const model = ref({
+  countryCode: '+86',
+  phoneNumber: '',
+  verificationCode: '',
+})
 
 // 条款同意选择
 const termsChecked = ref(false)
@@ -34,10 +38,8 @@ const termsChecked = ref(false)
 // 是否加载中
 const loading = ref(false)
 
-// 表单验证状态
-const isFormValid = computed(() => {
-  return phoneNumber.value.trim().length > 0 && referralCode.value.trim().length > 0 && termsChecked.value
-})
+// 错误提示信息
+const errorMessage = ref('')
 
 // 关闭弹窗
 function handleClose() {
@@ -51,32 +53,63 @@ function handleMaskClick() {
   handleClose()
 }
 
+// 显示错误信息
+function showError(message: string) {
+  errorMessage.value = message
+  setTimeout(() => {
+    errorMessage.value = ''
+  }, 3000)
+}
+
 // 重置表单
 function resetForm() {
-  phoneNumber.value = ''
-  referralCode.value = ''
-  countryCodeIndex.value = 0
+  model.value = {
+    countryCode: '+86',
+    phoneNumber: '',
+    verificationCode: '',
+  }
   termsChecked.value = false
   loading.value = false
+  errorMessage.value = ''
 }
 
-// 国家代码选择
-function onCountryChange(value: number) {
-  countryCodeIndex.value = value
-}
+// 表单验证规则
+const phoneRules = [
+  {
+    required: true,
+    message: '请输入手机号码',
+    pattern: /^1[3-9]\d{9}$/,
+  },
+]
 
-// 手机号登录
-async function handlePhoneLogin() {
-  if (!isFormValid.value) {
-    uni.showToast({
-      title: '请填写手机号并同意条款',
-      icon: 'none',
-    })
-    return
-  }
+const verificationCodeRules = [
+  {
+    required: true,
+    message: '请输入验证码',
+    pattern: /^\d{6}$/,
+  },
+]
 
-  loading.value = true
+// 表单提交
+async function handleSubmit() {
   try {
+    // 表单验证
+    await form.value.validate()
+
+    if (!termsChecked.value) {
+      showError('请阅读并同意相关条款')
+      return
+    }
+
+    loading.value = true
+
+    // 这里可以调用实际的登录API
+    // await tokenStore.login({
+    //   countryCode: model.value.countryCode,
+    //   phoneNumber: model.value.phoneNumber,
+    //   verificationCode: model.value.verificationCode
+    // })
+
     uni.showToast({
       title: '登录成功',
       icon: 'success',
@@ -88,6 +121,9 @@ async function handlePhoneLogin() {
   }
   catch (error) {
     console.error('登录失败:', error)
+    if (error !== false) { // 如果不是表单验证错误
+      showError('登录失败，请重试')
+    }
   }
   finally {
     loading.value = false
@@ -124,46 +160,52 @@ function handleContentClick(e: Event) {
           <text class="cursor-pointer text-2xl" @click="handleClose">✕</text>
         </view>
 
-        <!-- 内容区域 -->
+        <!-- 表单区域 -->
         <view class="flex-1 overflow-y-auto p-6 space-y-6">
-          <!-- 国家代码选择 -->
-          <view class="flex items-center gap-2">
-            <wd-picker
-              v-model="countryCodeIndex"
-              :columns="countryCodes"
-              @change="onCountryChange"
-            />
-            <wd-input
-              v-model="phoneNumber"
-              type="tel"
-              placeholder="手机号码"
-              class="flex-1"
-              :border="true"
-              size="large"
-            />
+          <!-- 错误提示区域 -->
+          <view v-if="errorMessage" class="error-message">
+            <text class="error-text">{{ errorMessage }}</text>
           </view>
 
-          <!-- 验证码输入框 -->
-          <wd-input
-            v-model="referralCode"
-            type="text"
-            placeholder="验证码"
-            :border="true"
-            size="large"
-          />
+          <wd-form ref="form" :model="model">
+            <!-- 手机号输入 -->
+            <wd-input
+              v-model="model.phoneNumber"
+              prop="phoneNumber"
+              type="tel"
+              placeholder="手机号码"
+              :rules="phoneRules"
+              :border="true"
+              size="large"
+              clearable
+            />
 
-          <!-- 登录按钮 -->
-          <wd-button
-            :type="isFormValid ? 'primary' : 'default'"
-            size="large"
-            :disabled="!isFormValid || loading"
-            :loading="loading"
-            block
-            :class="{ 'custom-disabled': !isFormValid }"
-            @click="handlePhoneLogin"
-          >
-            {{ loading ? '加载中...' : '登录' }}
-          </wd-button>
+            <!-- 验证码输入 -->
+            <wd-input
+              v-model="model.verificationCode"
+              prop="verificationCode"
+              type="text"
+              placeholder="验证码"
+              :rules="verificationCodeRules"
+              :border="true"
+              size="large"
+              clearable
+            />
+
+            <!-- 登录按钮 -->
+            <view class="mt-8">
+              <wd-button
+                type="primary"
+                size="large"
+                :loading="loading"
+                block
+                custom-class="login-button"
+                @click="handleSubmit"
+              >
+                {{ loading ? '登录中...' : '登录' }}
+              </wd-button>
+            </view>
+          </wd-form>
 
           <!-- 条款勾选 -->
           <view class="mt-8">
@@ -188,7 +230,7 @@ function handleContentClick(e: Event) {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
+  z-index: 1000;
   display: flex;
   align-items: flex-end;
   animation: fadeIn 0.3s ease-out;
@@ -271,7 +313,7 @@ function handleContentClick(e: Event) {
   padding: 24rpx;
 }
 
-.space-y-6 > view + view {
+.space-y-6 > * + * {
   margin-top: 24rpx;
 }
 
@@ -279,62 +321,16 @@ function handleContentClick(e: Event) {
   gap: 8rpx;
 }
 
-.px-4 {
-  padding-left: 16rpx;
-  padding-right: 16rpx;
-}
-
-.py-3 {
-  padding-top: 12rpx;
-  padding-bottom: 12rpx;
-}
-
-.border {
-  border: 1rpx solid #d1d5db;
-}
-
-.border-b {
-  border-bottom: 1rpx solid #e5e7eb;
-}
-
-.border-gray-200 {
-  border-color: #e5e7eb;
-}
-
-.border-b-2 {
-  border-bottom: 4rpx solid #ef4444;
-}
-
-.border-red-500 {
-  border-color: #ef4444;
-}
-
 .pb-1 {
   padding-bottom: 4rpx;
-}
-
-.border-gray-300 {
-  border-color: #d1d5db;
-}
-
-.rounded-lg {
-  border-radius: 12rpx;
 }
 
 .text-sm {
   font-size: 28rpx;
 }
 
-.text-xl {
-  font-size: 32rpx;
-}
-
 .text-2xl {
   font-size: 40rpx;
-}
-
-.font-medium {
-  font-weight: 500;
 }
 
 .font-bold {
@@ -345,18 +341,6 @@ function handleContentClick(e: Event) {
   font-weight: 600;
 }
 
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.text-gray-600 {
-  color: #4b5563;
-}
-
-.text-gray-700 {
-  color: #374151;
-}
-
 .text-gray-900 {
   color: #111827;
 }
@@ -365,12 +349,8 @@ function handleContentClick(e: Event) {
   color: #2563eb;
 }
 
-.bg-gray-100 {
-  background-color: #f3f4f6;
-}
-
-.bg-gray-200 {
-  background-color: #e5e7eb;
+.text-gray-700 {
+  color: #374151;
 }
 
 .bg-white {
@@ -381,10 +361,6 @@ function handleContentClick(e: Event) {
   justify-content: space-between;
 }
 
-.justify-center {
-  justify-content: center;
-}
-
 .items-center {
   align-items: center;
 }
@@ -393,44 +369,16 @@ function handleContentClick(e: Event) {
   align-items: flex-start;
 }
 
-.text-center {
-  text-align: center;
-}
-
-.uppercase {
-  text-transform: uppercase;
-}
-
-.tracking-wide {
-  letter-spacing: 0.05em;
-}
-
 .cursor-pointer {
   cursor: pointer;
 }
 
-.mt-1 {
-  margin-top: 4rpx;
+.mt-6 {
+  margin-top: 24rpx;
 }
 
 .mt-8 {
   margin-top: 32rpx;
-}
-
-.space-y-4 > view + view {
-  margin-top: 16rpx;
-}
-
-.focus\:outline-none:focus {
-  outline: none;
-}
-
-.focus\:ring-2:focus {
-  box-shadow: 0 0 0 4rpx rgba(59, 130, 246, 0.5);
-}
-
-.focus\:ring-blue-500:focus {
-  --tw-ring-color: rgb(59 130 246);
 }
 
 button:disabled {
@@ -438,14 +386,46 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* 自定义按钮禁用样式 - 浅灰色 */
-.custom-disabled {
-  background-color: #9ca3af !important;
-  border-color: #9ca3af !important;
-  color: #ffffff !important;
+/* 错误提示样式 */
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 24rpx;
+  animation: shake 0.5s ease-in-out;
 }
 
-.custom-disabled:not([disabled]) {
-  opacity: 1;
+.error-text {
+  color: #dc2626;
+  font-size: 28rpx;
+  line-height: 1.4;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4rpx);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4rpx);
+  }
+}
+
+/* 自定义登录按钮样式 - 轻微圆角 */
+:deep() {
+  .login-button {
+    border-radius: 8rpx !important;
+  }
 }
 </style>

@@ -18,7 +18,6 @@
       :user-points="userPoints"
       @pickup-order="handlePickupOrder"
       @delivery-order="handleDeliveryOrder"
-      @show-login="handleShowLogin"
     />
 
     <!-- 功能图标区域 -->
@@ -49,7 +48,6 @@ import type { FunctionItem } from './components'
 import { ref } from 'vue'
 // 引入登录弹窗
 import { useLoginPopup, withLoginCheck } from '@/hooks/useLoginPopup'
-import { useTokenStore } from '@/store/token'
 // 引入组件
 import { FunctionMenu, MemberActivity, UserCard } from './components'
 // 引入样式
@@ -63,7 +61,6 @@ definePage({
 })
 
 // 登录相关
-const tokenStore = useTokenStore()
 const { showLoginPopup, showLogin, hideLogin, handleLoginSuccess } = useLoginPopup()
 
 // 响应式数据
