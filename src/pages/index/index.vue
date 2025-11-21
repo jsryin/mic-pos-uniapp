@@ -99,18 +99,18 @@ const functionItems = ref<FunctionItem[]>([
   },
 ])
 
-// 需要登录的操作（使用登录检查装饰器）
-const handlePickupOrder = withLoginCheck(() => {
+// 门店自取（不需要登录）
+function handlePickupOrder() {
   uni.navigateTo({
     url: '/pages/pickup/pickup',
   })
-})
+}
 
-const handleDeliveryOrder = withLoginCheck(() => {
+function handleDeliveryOrder() {
   uni.navigateTo({
     url: '/pages/order/order',
   })
-})
+}
 
 // 需要登录的功能点击（使用登录检查装饰器）
 const handleInviteAction = withLoginCheck(() => {

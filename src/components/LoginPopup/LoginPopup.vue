@@ -97,7 +97,7 @@ async function handleSubmit() {
     await form.value.validate()
 
     if (!termsChecked.value) {
-      showError('请阅读并同意相关条款')
+      showError('请勾选我已阅读并同意')
       return
     }
 
@@ -129,120 +129,99 @@ async function handleSubmit() {
     loading.value = false
   }
 }
-
-// 阻止内容区域点击事件冒泡
-function handleContentClick(e: Event) {
-  e.stopPropagation()
-}
 </script>
 
 <template>
-  <view
-    v-if="modelValue"
-    class="login-popup-overlay"
+  <wd-overlay
+    :show="modelValue"
+    :duration="300"
+    :lock-scroll="true"
+    :z-index="1000"
     @click="handleMaskClick"
   >
-    <view
-      class="login-popup-content"
-      :class="{ 'slide-up': modelValue }"
-      @click="handleContentClick"
-    >
-      <!-- 拖拽条 -->
-      <view class="drag-indicator" />
+    <view class="wrapper">
+      <view class="login-popup-content" @click.stop="">
+        <!-- 拖拽条 -->
+        <view class="drag-indicator" />
 
-      <!-- 弹窗容器 -->
-      <view class="h-full w-full flex flex-col bg-white">
-        <!-- 头部 -->
-        <view class="flex items-center justify-between p-6">
-          <view class="pb-1" style="border-bottom: 2px solid #ef4444;">
-            <text class="text-2xl text-gray-900 font-bold">登录</text>
-          </view>
-          <text class="cursor-pointer text-2xl" @click="handleClose">✕</text>
-        </view>
-
-        <!-- 表单区域 -->
-        <view class="flex-1 overflow-y-auto p-6 space-y-6">
-          <!-- 错误提示区域 -->
-          <view v-if="errorMessage" class="error-message">
-            <text class="error-text">{{ errorMessage }}</text>
-          </view>
-
-          <wd-form ref="form" :model="model">
-            <!-- 手机号输入 -->
-            <wd-input
-              v-model="model.phoneNumber"
-              prop="phoneNumber"
-              type="tel"
-              placeholder="手机号码"
-              :rules="phoneRules"
-              :border="true"
-              size="large"
-              clearable
-            />
-
-            <!-- 验证码输入 -->
-            <wd-input
-              v-model="model.verificationCode"
-              prop="verificationCode"
-              type="text"
-              placeholder="验证码"
-              :rules="verificationCodeRules"
-              :border="true"
-              size="large"
-              clearable
-            />
-
-            <!-- 登录按钮 -->
-            <view class="mt-8">
-              <wd-button
-                type="primary"
-                size="large"
-                :loading="loading"
-                block
-                custom-class="login-button"
-                @click="handleSubmit"
-              >
-                {{ loading ? '登录中...' : '登录' }}
-              </wd-button>
+        <!-- 弹窗容器 -->
+        <view class="h-full w-full flex flex-col bg-white">
+          <!-- 头部 -->
+          <view class="flex items-center justify-between p-6">
+            <view class="pb-1" style="border-bottom: 2px solid #ef4444;">
+              <text class="text-2xl text-gray-900 font-bold">登录</text>
             </view>
-          </wd-form>
+            <text class="cursor-pointer text-2xl" @click="handleClose">✕</text>
+          </view>
 
-          <!-- 条款勾选 -->
-          <view class="mt-8">
-            <view class="flex items-start gap-2">
-              <wd-checkbox v-model="termsChecked" />
-              <view class="text-sm text-gray-700">
-                我已阅读并同意 <text class="text-blue-600 font-semibold">使用条款</text> 和 <text class="text-blue-600 font-semibold">隐私政策</text>
+          <!-- 表单区域 -->
+          <view class="flex-1 overflow-y-auto p-6 space-y-6">
+            <!-- 错误提示区域 -->
+            <view v-if="errorMessage" class="error-message">
+              <text class="error-text">{{ errorMessage }}</text>
+            </view>
+
+            <wd-form ref="form" :model="model">
+              <!-- 手机号输入 -->
+              <wd-input
+                v-model="model.phoneNumber"
+                prop="phoneNumber"
+                type="tel"
+                placeholder="手机号码"
+                :rules="phoneRules"
+                :border="true"
+                size="large"
+                clearable
+              />
+
+              <!-- 验证码输入 -->
+              <wd-input
+                v-model="model.verificationCode"
+                prop="verificationCode"
+                type="text"
+                placeholder="验证码"
+                :rules="verificationCodeRules"
+                :border="true"
+                size="large"
+                clearable
+              />
+
+              <!-- 登录按钮 -->
+              <view class="mt-8">
+                <wd-button
+                  type="primary"
+                  size="large"
+                  :loading="loading"
+                  block
+                  custom-class="login-button"
+                  @click="handleSubmit"
+                >
+                  {{ loading ? '登录中...' : '登录' }}
+                </wd-button>
+              </view>
+            </wd-form>
+
+            <!-- 条款勾选 -->
+            <view class="mt-8">
+              <view class="flex items-start gap-2">
+                <wd-checkbox v-model="termsChecked" />
+                <view class="text-sm text-gray-700">
+                  我已阅读并同意 <text class="text-blue-600 font-semibold">使用条款</text> 和 <text class="text-blue-600 font-semibold">隐私政策</text>
+                </view>
               </view>
             </view>
           </view>
         </view>
       </view>
     </view>
-  </view>
+  </wd-overlay>
 </template>
 
 <style lang="scss" scoped>
-.login-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+.wrapper {
   display: flex;
   align-items: flex-end;
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  height: 100%;
 }
 
 .login-popup-content {
@@ -251,15 +230,9 @@ function handleContentClick(e: Event) {
   background-color: #fff;
   border-radius: 24rpx 24rpx 0 0;
   position: relative;
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.login-popup-content.slide-up {
-  transform: translateY(0);
 }
 
 .drag-indicator {
@@ -393,33 +366,12 @@ button:disabled {
   border-radius: 8rpx;
   padding: 16rpx 24rpx;
   margin-bottom: 24rpx;
-  animation: shake 0.5s ease-in-out;
 }
 
 .error-text {
   color: #dc2626;
   font-size: 28rpx;
   line-height: 1.4;
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  10%,
-  30%,
-  50%,
-  70%,
-  90% {
-    transform: translateX(-4rpx);
-  }
-  20%,
-  40%,
-  60%,
-  80% {
-    transform: translateX(4rpx);
-  }
 }
 
 /* 自定义登录按钮样式 - 轻微圆角 */
