@@ -37,9 +37,14 @@ export function getTemplateByKey(key: string) {
 
   try {
     const keyList = key.split('.')
-    return keyList.reduce((pre, cur) => {
-      return pre[cur]
+    const result = keyList.reduce((pre, cur) => {
+      return pre && pre[cur]
     }, message)
+    if (result === undefined) {
+      console.warn(`[i18n] Key "${key}" not found in locale "${locale}", returning empty string`)
+      return ''
+    }
+    return result
   }
   catch (error) {
     console.error(`[i18n] Function getTemplateByKey(), key param ${key} is not existed.`)
@@ -55,6 +60,12 @@ export function getTemplateByKey(key: string) {
  * @returns
  */
 function formatI18n(template: string, data?: any) {
+  // 检查 template 是否为 undefined、null 或空字符串
+  if (!template && template !== '') {
+    console.warn('[i18n] formatI18n: template is undefined, null or empty')
+    return ''
+  }
+
   return template.replace(/\{([^}]+)\}/g, (match, key: string) => {
     // console.log( match, key) // => { detail.height }  detail.height
     const arr = key.trim().split('.')
