@@ -13,7 +13,7 @@
         height: '44px',
       }"
     >
-      <view class="flex items-center" @click="handleFriendsClick">
+      <view class="flex items-center" @click="showLogin">
         <image src="/static/logo.png" class="h-9 w-9 rounded-full" />
         <text class="ml-3 text-lg font-bold">登录</text>
         <view class="i-carbon-chevron-right text-lg text-gray-500" />

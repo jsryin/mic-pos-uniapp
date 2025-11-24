@@ -29,7 +29,7 @@ const form = ref()
 const model = ref({
   countryCode: '+86',
   phoneNumber: '',
-  verificationCode: '',
+  password: '',
 })
 
 // 条款同意选择
@@ -66,7 +66,7 @@ function resetForm() {
   model.value = {
     countryCode: '+86',
     phoneNumber: '',
-    verificationCode: '',
+    password: '',
   }
   termsChecked.value = false
   loading.value = false
@@ -82,11 +82,12 @@ const phoneRules = [
   },
 ]
 
-const verificationCodeRules = [
+const passwordRules = [
   {
     required: true,
-    message: '请输入验证码',
-    pattern: /^\d{6}$/,
+    message: '请输入密码',
+    min: 6,
+    max: 20,
   },
 ]
 
@@ -107,7 +108,7 @@ async function handleSubmit() {
     // await tokenStore.login({
     //   countryCode: model.value.countryCode,
     //   phoneNumber: model.value.phoneNumber,
-    //   verificationCode: model.value.verificationCode
+    //   password: model.value.password
     // })
 
     uni.showToast({
@@ -174,16 +175,17 @@ async function handleSubmit() {
                 clearable
               />
 
-              <!-- 验证码输入 -->
+              <!-- 密码输入 -->
               <wd-input
-                v-model="model.verificationCode"
-                prop="verificationCode"
+                v-model="model.password"
+                prop="password"
                 type="text"
-                placeholder="验证码"
-                :rules="verificationCodeRules"
+                placeholder="密码"
+                :rules="passwordRules"
                 :border="true"
                 size="large"
                 clearable
+                show-password
               />
 
               <!-- 登录按钮 -->
