@@ -28,20 +28,46 @@ export class MockHandler {
    * 判断是否应该Mock
    */
   public shouldMock(context: MockRequestContext): boolean {
-    if (!this.isMockEnabled())
-      return false
+    console.log('[MOCK] Handler - 检查是否应该Mock:', {
+      请求URL: context.url,
+      请求方法: context.method,
+      Mock总启用: this.isMockEnabled(),
+      规则数量: this.rules.length,
+    })
 
-    for (const rule of this.rules) {
-      if (!rule.enabled)
+    if (!this.isMockEnabled()) {
+      console.log('[MOCK] Handler - Mock未全局启用')
+      return false
+    }
+
+    for (let i = 0; i < this.rules.length; i++) {
+      const rule = this.rules[i]
+      console.log(`[MOCK] Handler - 检查规则${i + 1}:`, {
+        规则URL: rule.urlPattern,
+        规则方法: rule.method,
+        规则启用: rule.enabled,
+      })
+
+      if (!rule.enabled) {
+        console.log(`[MOCK] Handler - 规则${i + 1}未启用，跳过`)
         continue
+      }
 
       const urlMatch = this.matchUrl(context.url, rule.urlPattern)
       const methodMatch = !rule.method || rule.method.toLowerCase() === context.method.toLowerCase()
 
+      console.log(`[MOCK] Handler - 规则${i + 1}匹配结果:`, {
+        URL匹配: urlMatch,
+        方法匹配: methodMatch,
+      })
+
       if (urlMatch && methodMatch) {
+        console.log(`[MOCK] Handler - ✅ 规则${i + 1}匹配成功`)
         return true
       }
     }
+
+    console.log('[MOCK] Handler - ❌ 没有匹配的规则')
     return false
   }
 
@@ -62,6 +88,7 @@ export class MockHandler {
         try {
           if (this.config.debug) {
             console.log(`[MOCK] 生成响应: ${context.method} ${context.url}`)
+            console.log(`rule为: `, rule)
           }
 
           const mockData = rule.response(context)
@@ -105,7 +132,12 @@ export class MockHandler {
   }
 
   private formatMockResponse(data: any): any {
-    // 保持与后端响应格式一致
+    // 如果数据已经是完整的API响应格式（包含code字段），直接返回
+    if (data && typeof data === 'object' && 'code' in data) {
+      return data
+    }
+
+    // 否则包装为标准API响应格式
     return {
       code: 200,
       data,

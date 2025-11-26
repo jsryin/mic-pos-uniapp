@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import type { Category, ProductGroup } from '@/api/product'
+import { onMounted, ref } from 'vue'
+import { getCategories, getProductGroups } from '@/api/product'
 import { useLoginPopup, withLoginCheck } from '@/hooks/useLoginPopup'
 import { useTokenStore } from '@/store/token'
 import '@/pages/order/styles/order.scss'
@@ -26,86 +28,60 @@ const currentCateId = ref(2)
 // 滚动位置
 const scrollTop = ref(0)
 
-// 接口类型定义
-interface Category {
-  id: number
-  name: string
-  icon?: string
-  tag?: string
-}
-
-interface Product {
-  id: number
-  title: string
-  desc: string
-  price: number
-  image: string
-  badge?: string
-}
-
-interface ProductGroup {
-  id: number
-  name: string
-  items: Product[]
-}
+// 加载状态
+const loading = ref(false)
 
 // 分类数据
-const categories = ref<Category[]>([
-  { id: 1, name: '甄选套餐', icon: 'gift', badge: '' },
-  { id: 2, name: '新品尝鲜', icon: 'filter', badge: 'NEW' },
-  { id: 3, name: '原叶鲜奶茶', icon: 'chart-pie', badge: '' },
-  { id: 4, name: '原叶特调茶', icon: 'layers', badge: '' },
-  { id: 5, name: '活力轻果茶', icon: 'sugar', badge: '' },
-  { id: 6, name: '低负担专区', icon: 'info-circle', badge: '0卡' },
-])
+const categories = ref<Category[]>([])
 
 // 商品数据
-const productGroups = ref<ProductGroup[]>([
-  {
-    id: 1,
-    name: '甄选套餐',
-    items: [
-      {
-        id: 101,
-        title: '【观象知时冰箱贴】单大杯随心配套餐',
-        desc: '购买即得原叶鲜奶茶(大杯)*1+观象知时冰箱贴(随机款)*1，数量有限，售完即止。',
-        price: 35.9,
-        image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=200&q=80',
-        badge: '套餐',
-      },
-      {
-        id: 102,
-        title: '【降温好茶 伴你入秋】鲜奶茶三大杯随心选套餐',
-        desc: '精选三杯好茶，温暖入秋，适合办公室分享。',
-        price: 48.6,
-        image: 'https://images.unsplash.com/photo-1626202378538-072485e16d87?auto=format&fit=crop&w=200&q=80',
-        badge: '特惠',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: '新品尝鲜',
-    items: [
-      {
-        id: 201,
-        title: '赤霞跃金「广东限定」',
-        desc: '入口白芽奇兰清雅兰香，回韵醇厚，叠加广东新会陈皮自然甘润，形成独特风味。',
-        price: 18.0,
-        image: 'https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?auto=format&fit=crop&w=200&q=80',
-        badge: '',
-      },
-      {
-        id: 202,
-        title: '万里木兰（原叶鲜奶茶）',
-        desc: '经典红茶底，搭配优质鲜牛乳，茶香浓郁。',
-        price: 16.0,
-        image: 'https://images.unsplash.com/photo-1571934811356-5cc55449d0a4?auto=format&fit=crop&w=200&q=80',
-        badge: '热销',
-      },
-    ],
-  },
-])
+const productGroups = ref<ProductGroup[]>([])
+
+// --- 数据加载 ---
+// 加载分类数据
+async function loadCategories() {
+  try {
+    loading.value = true
+    categories.value = await getCategories()
+    // console.log('分类数据:', categories.value)
+  }
+  catch (error) {
+    console.error('加载分类数据失败:', error)
+    uni.showToast({
+      title: '加载分类数据失败',
+      icon: 'none',
+    })
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+// 加载商品数据
+async function loadProducts() {
+  try {
+    loading.value = true
+    productGroups.value = await getProductGroups()
+  }
+  catch (error) {
+    console.error('加载商品数据失败:', error)
+    uni.showToast({
+      title: '加载商品数据失败',
+      icon: 'none',
+    })
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+// 初始化数据加载
+onMounted(async () => {
+  await Promise.all([
+    loadCategories(),
+    loadProducts(),
+  ])
+})
 
 // --- Logic ---
 // 添加到购物车（需要登录）
@@ -224,6 +200,12 @@ const viewOrderHistory = withLoginCheck(() => {
       <!-- 左侧分类导航 -->
       <scroll-view scroll-y class="h-full w-[90px] bg-[#f6f6f6]" :enhanced="true" :show-scrollbar="false">
         <view class="pb-24">
+          <!-- 加载状态 -->
+          <view v-if="loading && categories.length === 0" class="flex flex-col items-center justify-center py-8">
+            <wd-icon name="loading" size="20px" color="#999" class="animate-spin" />
+            <text class="mt-2 text-xs text-gray-400">加载中...</text>
+          </view>
+
           <view
             v-for="item in categories"
             :key="item.id"
@@ -233,8 +215,8 @@ const viewOrderHistory = withLoginCheck(() => {
           >
             <view v-if="currentCateId === item.id" class="absolute left-0 top-1/2 h-[18px] w-[3px] rounded-r-full bg-[#333] -translate-y-1/2" />
 
-            <view v-if="item.tag" class="absolute right-1 top-1 z-10 origin-center scale-75 rounded-[2px] bg-[#ff4d4f] px-[3px] py-[1px] text-[8px] text-white shadow-sm">
-              {{ item.tag }}
+            <view v-if="item.badge" class="absolute right-1 top-1 z-10 origin-center scale-75 rounded-[2px] bg-[#ff4d4f] px-[3px] py-[1px] text-[8px] text-white shadow-sm">
+              {{ item.badge }}
             </view>
 
             <view class="mb-1.5 transition-transform duration-200" :class="currentCateId === item.id ? 'scale-110' : 'opacity-50 grayscale'">
@@ -270,6 +252,12 @@ const viewOrderHistory = withLoginCheck(() => {
           </view>
 
           <!-- 商品列表 -->
+          <!-- 加载状态 -->
+          <view v-if="loading && productGroups.length === 0" class="flex flex-col items-center justify-center py-12">
+            <wd-icon name="loading" size="24px" color="#999" class="animate-spin" />
+            <text class="mt-2 text-sm text-gray-400">加载商品中...</text>
+          </view>
+
           <view v-for="group in productGroups" :key="group.id" class="mb-8">
             <view class="sticky top-0 z-10 mb-3 bg-white py-1 text-[13px] text-gray-800 font-bold">
               {{ group.name }}

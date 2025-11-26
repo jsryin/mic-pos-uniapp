@@ -26,6 +26,7 @@ export function http<T>(options: CustomRequestOptions) {
             icon: 'none',
             title: responseData.message || responseData.msg || '请求错误',
           })
+          return resolve(responseData.data)
         }
 
         return resolve(responseData.data)

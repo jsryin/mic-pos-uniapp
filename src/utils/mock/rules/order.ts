@@ -2,109 +2,133 @@ import type { MockRule } from '@/utils/mock/mock.config'
 import { mockGenerators } from '@/utils/mock/mock.generators'
 
 export const orderMockRules: MockRule[] = [
-  // 获取订单列表
+  // 获取所有商品分类
   {
-    urlPattern: '/api/order/list',
+    urlPattern: '/api/categories',
     method: 'GET',
     enabled: true,
-    priority: 1,
+    delay: 200,
+    response: () => ({
+      code: 200,
+      data: mockGenerators.order.categories(),
+      message: '获取商品分类成功',
+    }),
+  },
+
+  // 获取所有商品（按分组）
+  {
+    urlPattern: '/api/products',
+    method: 'GET',
+    enabled: true,
+    delay: 300,
+    response: () => ({
+      code: 200,
+      data: mockGenerators.order.list(),
+      message: '获取商品列表成功',
+    }),
+  },
+
+  // 根据分类ID获取商品
+  {
+    urlPattern: '/api/products/category/:id',
+    method: 'GET',
+    enabled: true,
+    delay: 200,
+    response: (request) => {
+      const categoryId = Number.parseInt(request.params?.id || '1')
+      const products = mockGenerators.order.getByCategory(categoryId)
+
+      return {
+        code: 200,
+        data: products,
+        message: '获取分类商品成功',
+      }
+    },
+  },
+
+  // 搜索商品
+  {
+    urlPattern: '/api/products/search',
+    method: 'GET',
+    enabled: true,
     delay: 250,
     response: (request) => {
-      const page = Number.parseInt(request.query?.page || '1')
-      const pageSize = Number.parseInt(request.query?.pageSize || '10')
-      const status = request.query?.status
+      const keyword = request.query?.keyword || ''
+      const allProducts = mockGenerators.order.list()
 
-      let orderList = mockGenerators.order.list(100)
+      // 简单的搜索逻辑：在商品标题和描述中查找关键词
+      const searchResults = allProducts
+        .map(group => ({
+          ...group,
+          items: group.items.filter(item =>
+            item.title.includes(keyword)
+            || item.desc.includes(keyword),
+          ),
+        }))
+        .filter(group => group.items.length > 0)
 
-      // 按状态筛选
-      if (status) {
-        orderList = orderList.filter(item => item.status === status)
+      return {
+        code: 200,
+        data: searchResults,
+        message: '搜索商品成功',
       }
-
-      return mockGenerators.pagination(orderList, page, pageSize)
     },
   },
 
-  // 获取订单详情
+  // 获取单个商品详情
   {
-    urlPattern: '/api/order/\\w+',
+    urlPattern: '/api/products/:id',
     method: 'GET',
     enabled: true,
-    priority: 1,
-    delay: 200,
+    delay: 150,
     response: (request) => {
-      const orderId = request.url.split('/').pop()
-      return mockGenerators.order.detail(orderId)
-    },
-  },
+      const productId = Number.parseInt(request.params?.id || '1')
+      const allProducts = mockGenerators.order.list()
 
-  // 创建订单
-  {
-    urlPattern: '/api/order/create',
-    method: 'POST',
-    enabled: true,
-    priority: 1,
-    delay: 400,
-    response: (request) => {
-      const newOrder = {
-        id: `ORD${String(Date.now()).slice(-8)}`,
-        orderNo: `NO${String(Date.now()).slice(-12)}`,
-        ...request.data,
-        status: 'pending',
-        statusText: '待付款',
-        createTime: new Date().toISOString(),
-        updateTime: new Date().toISOString(),
+      let product = null
+      for (const group of allProducts) {
+        const found = group.items.find(item => item.id === productId)
+        if (found) {
+          product = found
+          break
+        }
       }
-      return { success: true, data: newOrder }
-    },
-  },
 
-  // 更新订单状态
-  {
-    urlPattern: '/api/order/status',
-    method: 'PUT',
-    enabled: true,
-    priority: 1,
-    delay: 300,
-    response: (request) => {
-      const { orderId, status } = request.data || {}
-      const statusText = {
-        pending: '待付款',
-        paid: '已付款',
-        shipped: '已发货',
-        completed: '已完成',
-        cancelled: '已取消',
-      }[status] || status
+      if (!product) {
+        return {
+          code: 404,
+          data: null,
+          message: '商品不存在',
+        }
+      }
 
       return {
-        success: true,
-        data: {
-          orderId,
-          status,
-          statusText,
-          updateTime: new Date().toISOString(),
-        },
+        code: 200,
+        data: product,
+        message: '获取商品详情成功',
       }
     },
   },
 
-  // 取消订单
+  // 获取热门商品
   {
-    urlPattern: '/api/order/cancel',
-    method: 'POST',
+    urlPattern: '/api/products/popular',
+    method: 'GET',
     enabled: true,
-    priority: 1,
     delay: 200,
-    response: (request) => {
-      const { orderId } = request.data || {}
+    response: () => {
+      const allProducts = mockGenerators.order.list()
+
+      // 收集所有带有热销、推荐等标签的商品
+      const popularProducts = allProducts
+        .flatMap(group => group.items)
+        .filter(item => ['热销', '推荐', '季节限定'].includes(item.badge))
+        .slice(0, 8) // 最多返回8个
+
       return {
-        success: true,
-        data: {
-          orderId,
-          status: 'cancelled',
-          statusText: '已取消',
-          cancelTime: new Date().toISOString(),
-        },
+        code: 200,
+        data: popularProducts,
+        message: '获取热门商品成功',
       }
     },
   },

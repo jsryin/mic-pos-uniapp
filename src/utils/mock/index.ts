@@ -1,5 +1,6 @@
 import type { MockRule } from '@/utils/mock/mock.config'
-import { getMockConfig } from '@/utils/mock/mock.config'
+import { getMockConfig, saveMockConfig } from '@/utils/mock/mock.config'
+import { mockInterceptor } from './mock.interceptor'
 
 /**
  * 初始化Mock规则
@@ -40,12 +41,20 @@ export function initializeMockRules() {
   // 3. 赋值给配置
   config.rules = [...config.rules, ...allRules]
 
-  // 保存配置到localStorage
+  // 保存配置状态到localStorage（使用安全的保存方法，不保存规则）
   if (import.meta.env.DEV) {
-    localStorage.setItem('mockConfig', JSON.stringify(config))
+    saveMockConfig(config)
     const loadedFiles = Object.keys(modules).length
-    console.log(`[Mock] 自动加载规则文件: ${loadedFiles} 个，共 ${allRules.length} 条规则`)
-    console.log(`[Mock] 已加载的规则文件: ${Object.keys(modules).map(path => path.replace('./rules/', '')).join(', ')}`)
+    console.log(`[MOCK] 自动加载规则文件: ${loadedFiles} 个，共 ${allRules.length} 条规则`)
+    console.log(`[MOCK] 已加载的规则文件: ${Object.keys(modules).map(path => path.replace('./rules/', '')).join(', ')}`)
+  }
+
+  // 更新已存在的MockHandler的规则
+  if (mockInterceptor) {
+    const handler = mockInterceptor.getMockHandler()
+    // 重新加载规则到handler
+    allRules.forEach(rule => handler.addRule(rule))
+    console.log(`[MOCK] 已更新MockHandler规则: ${allRules.length} 条`)
   }
 }
 

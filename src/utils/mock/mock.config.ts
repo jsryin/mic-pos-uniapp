@@ -32,7 +32,7 @@ export interface MockConfig {
 }
 
 export const defaultMockConfig: MockConfig = {
-  enabled: false,
+  enabled: true,
   environments: {
     development: true,
     test: false,
@@ -47,18 +47,35 @@ export const defaultMockConfig: MockConfig = {
  * 获取Mock配置
  */
 export function getMockConfig(): MockConfig {
+  let config = { ...defaultMockConfig }
+
   if (import.meta.env.DEV) {
     const saved = localStorage.getItem('mockConfig')
     if (saved) {
-      return { ...defaultMockConfig, ...JSON.parse(saved) }
+      // 恢复持久化的状态，但保持 defaultMockConfig 中的空 rules 数组
+      config = { ...config, ...JSON.parse(saved) }
+      console.log('[MOCK] 从localStorage恢复配置:', config.enabled)
     }
   }
 
-  return {
-    ...defaultMockConfig,
-    enabled: import.meta.env.VITE_MOCK_ENABLED === 'true',
-    debug: import.meta.env.VITE_MOCK_DEBUG === 'true',
-  }
+  // 应用环境变量配置
+  const envEnabled = import.meta.env.VITE_MOCK_ENABLED === 'true'
+  const envDebug = import.meta.env.VITE_MOCK_DEBUG === 'true'
+
+  config.enabled = envEnabled || config.enabled
+  config.debug = envDebug || config.debug
+
+  console.log('[MOCK] 配置信息:', {
+    环境变量启用: envEnabled,
+    环境变量调试: envDebug,
+    最终启用状态: config.enabled,
+    最终调试状态: config.debug,
+    当前环境: import.meta.env.MODE,
+    规则数量: config.rules.length,
+  })
+
+  // ‼️ 重要：这里返回的 config.rules 数组是空的，需要外部 (index.ts) 注入代码中的规则
+  return config
 }
 
 /**
@@ -66,6 +83,14 @@ export function getMockConfig(): MockConfig {
  */
 export function saveMockConfig(config: MockConfig): void {
   if (import.meta.env.DEV) {
-    localStorage.setItem('mockConfig', JSON.stringify(config))
+    // 创建一个只包含可序列化状态的新对象，不保存 rules 数组（因为包含函数无法序列化）
+    const savableConfig = {
+      enabled: config.enabled,
+      environments: config.environments,
+      defaultDelay: config.defaultDelay,
+      debug: config.debug,
+      // 关键：不保存 rules 数组，避免函数序列化问题
+    }
+    localStorage.setItem('mockConfig', JSON.stringify(savableConfig))
   }
 }
