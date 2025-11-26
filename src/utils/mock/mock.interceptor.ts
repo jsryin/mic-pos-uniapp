@@ -10,8 +10,6 @@ class MockInterceptor {
 
   constructor() {
     const config = getMockConfig()
-    console.log('[MOCK] 创建MockInterceptor，当前规则数量:', config.rules.length)
-    console.log('[MOCK] Mock启用状态:', config.enabled)
     this.mockHandler = new MockHandler(config)
   }
 
@@ -33,24 +31,22 @@ class MockInterceptor {
    */
   public async processRequest(options: CustomRequestOptions): Promise<{ shouldMock: boolean, mockResponse?: any, processedOptions?: CustomRequestOptions }> {
     const context = this.createMockContext(options)
-    console.log(`[MOCK] 检查请求: ${context.method} ${context.url}`)
 
     if (!this.mockHandler.shouldMock(context)) {
-      console.log(`[MOCK] ❌ 不匹配Mock规则，执行真实请求: ${context.method} ${context.url}`)
       return { shouldMock: false, processedOptions: options }
     }
 
-    console.log(`[MOCK] ✅ 匹配Mock规则，返回Mock数据: ${context.method} ${context.url}`)
+    console.log(`[MOCK] ✅ 匹配规则 - ${context.method} ${context.url}`)
 
     if (this.mockHandler.getConfig().debug) {
-      console.log(`[MOCK] 调试模式 - 请求上下文:`, context)
+      console.log(`[MOCK] 请求上下文:`, context)
     }
 
     const mockResponse = await this.mockHandler.generateMockResponse(context)
 
     if (mockResponse) {
       if (this.mockHandler.getConfig().debug) {
-        console.log(`[MOCK] 生成的Mock响应:`, mockResponse)
+        console.log(`[MOCK] 生成响应:`, mockResponse)
       }
       return {
         shouldMock: true,
@@ -59,7 +55,7 @@ class MockInterceptor {
       }
     }
 
-    console.log(`[MOCK] ⚠️ Mock响应生成失败，执行真实请求: ${context.method} ${context.url}`)
+    console.log(`[MOCK] ⚠️ 响应生成失败 - ${context.method} ${context.url}`)
     return { shouldMock: false, processedOptions: options }
   }
 

@@ -45,8 +45,6 @@ export function initializeMockRules() {
   if (import.meta.env.DEV) {
     saveMockConfig(config)
     const loadedFiles = Object.keys(modules).length
-    console.log(`[MOCK] 自动加载规则文件: ${loadedFiles} 个，共 ${allRules.length} 条规则`)
-    console.log(`[MOCK] 已加载的规则文件: ${Object.keys(modules).map(path => path.replace('./rules/', '')).join(', ')}`)
   }
 
   // 更新已存在的MockHandler的规则
@@ -54,7 +52,6 @@ export function initializeMockRules() {
     const handler = mockInterceptor.getMockHandler()
     // 重新加载规则到handler
     allRules.forEach(rule => handler.addRule(rule))
-    console.log(`[MOCK] 已更新MockHandler规则: ${allRules.length} 条`)
   }
 }
 

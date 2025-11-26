@@ -6,7 +6,12 @@ import { mockInterceptor } from './mock.interceptor'
  * Mock控制器 - 提供运行时控制Mock功能
  */
 export class MockController {
-  private config = getMockConfig()
+  private config: MockConfig
+
+  constructor() {
+    // 延迟获取配置，避免多次初始化
+    this.config = getMockConfig()
+  }
 
   /**
    * 启用Mock

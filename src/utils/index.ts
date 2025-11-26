@@ -126,7 +126,6 @@ export function getCurrentPageI18nKey() {
   console.log(currPage)
   // 处理两种配置方式：直接在根级别或在style对象内
   const titleText = currPage.style?.navigationBarTitleText || currPage.navigationBarTitleText || ''
-  console.log(titleText)
   return titleText
 }
 

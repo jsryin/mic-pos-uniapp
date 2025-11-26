@@ -43,10 +43,18 @@ export const defaultMockConfig: MockConfig = {
   debug: false,
 }
 
+// 缓存配置避免重复初始化
+let cachedConfig: MockConfig | null = null
+
 /**
  * 获取Mock配置
  */
 export function getMockConfig(): MockConfig {
+  // 如果已经有缓存配置，直接返回
+  if (cachedConfig) {
+    return { ...cachedConfig }
+  }
+
   let config = { ...defaultMockConfig }
 
   if (import.meta.env.DEV) {
@@ -54,7 +62,6 @@ export function getMockConfig(): MockConfig {
     if (saved) {
       // 恢复持久化的状态，但保持 defaultMockConfig 中的空 rules 数组
       config = { ...config, ...JSON.parse(saved) }
-      console.log('[MOCK] 从localStorage恢复配置:', config.enabled)
     }
   }
 
@@ -65,17 +72,10 @@ export function getMockConfig(): MockConfig {
   config.enabled = envEnabled || config.enabled
   config.debug = envDebug || config.debug
 
-  console.log('[MOCK] 配置信息:', {
-    环境变量启用: envEnabled,
-    环境变量调试: envDebug,
-    最终启用状态: config.enabled,
-    最终调试状态: config.debug,
-    当前环境: import.meta.env.MODE,
-    规则数量: config.rules.length,
-  })
+  // 缓存配置
+  cachedConfig = config
 
-  // ‼️ 重要：这里返回的 config.rules 数组是空的，需要外部 (index.ts) 注入代码中的规则
-  return config
+  return { ...config }
 }
 
 /**
@@ -92,5 +92,10 @@ export function saveMockConfig(config: MockConfig): void {
       // 关键：不保存 rules 数组，避免函数序列化问题
     }
     localStorage.setItem('mockConfig', JSON.stringify(savableConfig))
+
+    // 更新缓存配置
+    if (cachedConfig) {
+      cachedConfig = { ...cachedConfig, ...savableConfig }
+    }
   }
 }

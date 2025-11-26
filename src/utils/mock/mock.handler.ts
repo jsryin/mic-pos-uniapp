@@ -28,46 +28,23 @@ export class MockHandler {
    * 判断是否应该Mock
    */
   public shouldMock(context: MockRequestContext): boolean {
-    console.log('[MOCK] Handler - 检查是否应该Mock:', {
-      请求URL: context.url,
-      请求方法: context.method,
-      Mock总启用: this.isMockEnabled(),
-      规则数量: this.rules.length,
-    })
-
     if (!this.isMockEnabled()) {
-      console.log('[MOCK] Handler - Mock未全局启用')
       return false
     }
 
-    for (let i = 0; i < this.rules.length; i++) {
-      const rule = this.rules[i]
-      console.log(`[MOCK] Handler - 检查规则${i + 1}:`, {
-        规则URL: rule.urlPattern,
-        规则方法: rule.method,
-        规则启用: rule.enabled,
-      })
-
+    for (const rule of this.rules) {
       if (!rule.enabled) {
-        console.log(`[MOCK] Handler - 规则${i + 1}未启用，跳过`)
         continue
       }
 
       const urlMatch = this.matchUrl(context.url, rule.urlPattern)
       const methodMatch = !rule.method || rule.method.toLowerCase() === context.method.toLowerCase()
 
-      console.log(`[MOCK] Handler - 规则${i + 1}匹配结果:`, {
-        URL匹配: urlMatch,
-        方法匹配: methodMatch,
-      })
-
       if (urlMatch && methodMatch) {
-        console.log(`[MOCK] Handler - ✅ 规则${i + 1}匹配成功`)
         return true
       }
     }
 
-    console.log('[MOCK] Handler - ❌ 没有匹配的规则')
     return false
   }
 
@@ -86,16 +63,11 @@ export class MockHandler {
 
       setTimeout(() => {
         try {
-          if (this.config.debug) {
-            console.log(`[MOCK] 生成响应: ${context.method} ${context.url}`)
-            console.log(`rule为: `, rule)
-          }
-
           const mockData = rule.response(context)
           resolve(this.formatMockResponse(mockData))
         }
         catch (error) {
-          console.error('Mock数据生成错误:', error)
+          console.error('[MOCK] 数据生成错误:', error)
           resolve(null)
         }
       }, delay)
