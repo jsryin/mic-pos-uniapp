@@ -179,3 +179,9 @@ export const isDoubleTokenMode = import.meta.env.VITE_AUTH_MODE === 'double'
  * 通常为 /pages/index/index
  */
 export const HOME_PAGE = `/${(pages as PageMetaDatum[]).find(page => page.type === 'home')?.path || (pages as PageMetaDatum[])[0].path}`
+
+// Mock功能导出
+export * from './mock/mock.config'
+export * from './mock/mock.controller'
+export { mockController } from './mock/mock.controller'
+export * from './mock/mock.generators'

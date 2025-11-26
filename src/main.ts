@@ -8,6 +8,9 @@ import store from './store'
 import '@/style/index.scss'
 import 'virtual:uno.css'
 
+// Mock功能初始化 - 新增
+import '@/utils/mock'
+
 export function createApp() {
   const app = createSSRApp(App)
   app.use(store)
