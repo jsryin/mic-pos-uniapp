@@ -126,7 +126,7 @@ function copyOrderNo() {
       </view>
     </view>
 
-    <view class="px-3 pb-10">
+    <view class="px-3" style="padding-bottom: calc(50px + env(safe-area-inset-bottom));">
       <template v-if="activeTab === 0">
         <view class="mb-3 rounded-2xl bg-white p-6 text-center shadow-sm">
           <view class="text-lg font-bold">

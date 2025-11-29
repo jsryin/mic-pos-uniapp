@@ -798,3 +798,91 @@ image {
 .pt-status-bar {
   padding-top: 44rpx; /* 默认值，实际项目中应该动态获取 */
 }
+
+/* 购物车相关样式 */
+.cart-overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 40;
+  background-color: rgba(0, 0, 0, 0.6);
+  transition: opacity 0.3s ease;
+  bottom: 100rpx; /* 50px */
+}
+
+.cart-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  transition: opacity 0.2s ease;
+  bottom: 100rpx; /* 50px */
+}
+
+.cart-container.bg-white {
+  background-color: #ffffff;
+}
+
+.cart-container.bg-transparent {
+  background-color: transparent;
+}
+
+.cart-panel {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 48rpx 48rpx 0 0;
+  background-color: #ffffff;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.cart-button {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  height: 96rpx; /* 48px */
+  align-items: center;
+  overflow: hidden;
+  border-radius: 48rpx;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  margin: 0 32rpx 32rpx;
+  width: calc(100% - 64rpx);
+}
+
+.cart-button.bg-white {
+  background-color: #ffffff;
+  border: 2rpx solid #f3f4f6;
+}
+
+.cart-button.bg-dark {
+  background-color: #2a2a2a;
+}
+
+.cart-button:active {
+  transform: scale(0.99);
+}
+
+/* 定义动画 */
+.animate-slide-in-up {
+  animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* 确保 uni-app 的 button::after 边框被移除 */
+uni-button {
+  &::after {
+    border: none;
+  }
+}
