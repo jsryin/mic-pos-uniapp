@@ -192,8 +192,9 @@ const handleCheckout = withLoginCheck(() => {
 </script>
 
 <template>
-  <view class="box-border h-screen flex flex-col overflow-hidden bg-[#f6f6f6] text-[#333] font-sans">
-    <view class="pt-status-bar relative z-10 bg-white pb-2 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+  <view class="box-container flex flex-col overflow-hidden text-[#333] font-sans">
+    <!-- 固定顶部头部区域 -->
+    <view class="header-fixed pt-status-bar fixed left-0 right-0 top-0 z-20 bg-white pb-2 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
       <view class="mt-2 flex items-center justify-between px-4 py-2">
         <view class="flex items-baseline gap-4">
           <view class="relative flex flex-col items-center">
@@ -236,9 +237,19 @@ const handleCheckout = withLoginCheck(() => {
       </view>
     </view>
 
-    <view class="relative flex flex-1 overflow-hidden" :class="totalQuantity > 0 ? 'pb-24' : 'pb-16'">
-      <scroll-view scroll-y class="h-full w-[90px] bg-[#f6f6f6]" :enhanced="true" :show-scrollbar="false">
-        <view class="pb-24">
+    <!-- 添加头部高度占位，防止内容被固定头部遮挡 -->
+    <view class="header-placeholder" style="height: calc(44px + 16px + 30px + 16px + 20px + 8px);" />
+
+    <!-- 左右独立滚动区域 -->
+    <view class="flex flex-1 overflow-hidden">
+      <!-- 左侧分类独立滚动 -->
+      <scroll-view
+        scroll-y
+        class="h-full w-[90px] bg-[#f6f6f6]"
+        :enhanced="true"
+        :show-scrollbar="false"
+      >
+        <view class="py-2">
           <view
             v-for="item in categories"
             :key="item.id"
@@ -258,7 +269,14 @@ const handleCheckout = withLoginCheck(() => {
         </view>
       </scroll-view>
 
-      <scroll-view scroll-y class="h-full flex-1 bg-white px-3" :scroll-top="scrollTop" :scroll-with-animation="true">
+      <!-- 右侧商品独立滚动 -->
+      <scroll-view
+        scroll-y
+        class="h-full flex-1 bg-white px-3"
+        :scroll-top="scrollTop"
+        :scroll-with-animation="true"
+        :enhanced="true"
+      >
         <view class="pb-32 pt-3">
           <view class="relative mb-6 h-[140px] overflow-hidden rounded-xl shadow-sm">
             <view class="absolute inset-0 from-[#dcebd9] via-[#c8dcc4] to-[#a9c2a4] bg-gradient-to-br" />
@@ -304,6 +322,7 @@ const handleCheckout = withLoginCheck(() => {
       </scroll-view>
     </view>
 
+    <!-- 购物车悬浮层 -->
     <view
       v-if="isCartExpanded"
       class="cart-overlay"
@@ -384,27 +403,26 @@ const handleCheckout = withLoginCheck(() => {
       </view>
 
       <view
-        class="cart-button"
-        :class="isCartExpanded ? 'bg-white' : 'bg-dark'"
+        class="cart-button bg-dark"
       >
         <view class="flex flex-1 items-center px-4" @click="toggleCartPanel">
           <view class="relative mr-4 shrink-0">
             <view class="h-10 w-10 flex items-center justify-center rounded-[20px]">
-              <wd-icon name="shop" size="32px" :color="isCartExpanded ? '#333' : '#fff'" />
+              <wd-icon name="shop" size="32px" color="#fff" />
             </view>
-            <view class="absolute min-w-[18px] flex items-center justify-center border-2 rounded-full bg-[#ff4d4f] px-1 py-[1px] text-[10px] text-white -right-1 -top-1" :class="isCartExpanded ? 'border-gray-200' : 'border-[#2a2a2a]'">
+            <view class="absolute min-w-[18px] flex items-center justify-center border-2 border-[#2a2a2a] rounded-full bg-[#ff4d4f] px-1 py-[1px] text-[10px] text-white -right-1 -top-1">
               {{ totalQuantity }}
             </view>
           </view>
 
-          <view class="flex items-baseline" :class="isCartExpanded ? 'text-[#333]' : 'text-white'">
+          <view class="flex items-baseline text-white">
             <text class="text-[14px] font-bold">¥</text>
             <text class="ml-0.5 text-2xl font-bold">{{ totalPrice }}</text>
           </view>
         </view>
 
         <view
-          class="h-full w-24 flex items-center justify-center bg-[#8b6e51] text-[16px] text-white font-bold transition-opacity active:opacity-90"
+          class="h-full w-28 flex items-center justify-center bg-[#8b6e51] text-[16px] text-white font-bold transition-opacity active:opacity-90"
           @click="handleCheckout"
         >
           去结算

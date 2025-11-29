@@ -35,12 +35,18 @@ export const mockGenerators = {
   // 订单相关Mock数据
   order: {
     categories: () => [
-      { id: 1, name: '甄选套餐', icon: 'gift', badge: '' },
+      { id: 1, name: '甄选套餐', icon: 'gift', badge: '超值' },
       { id: 2, name: '新品尝鲜', icon: 'filter', badge: 'NEW' },
-      { id: 3, name: '原叶鲜奶茶', icon: 'chart-pie', badge: '' },
+      { id: 3, name: '原叶鲜奶茶', icon: 'chart-pie', badge: '热销' },
       { id: 4, name: '原叶特调茶', icon: 'layers', badge: '' },
       { id: 5, name: '活力轻果茶', icon: 'sugar', badge: '' },
       { id: 6, name: '低负担专区', icon: 'info-circle', badge: '0卡' },
+      { id: 7, name: '经典奶茶', icon: 'heart', badge: '经典' },
+      { id: 8, name: '鲜萃果茶', icon: 'lemon', badge: '清爽' },
+      { id: 9, name: '芝士茗茶', icon: 'star', badge: '推荐' },
+      { id: 10, name: '纯茶茗品', icon: 'leaf', badge: '' },
+      { id: 11, name: '咖啡时光', icon: 'coffee', badge: '醇香' },
+      { id: 12, name: '气泡水饮', icon: 'drop', badge: '0糖' },
     ],
 
     list: () => [

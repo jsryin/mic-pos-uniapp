@@ -38,6 +38,12 @@ image {
   height: 100vh;
 }
 
+/* 页面容器高度，考虑tabbar高度 */
+.box-container {
+  height: calc(100vh - 50px); /* 减去tabbar的50px高度 */
+  height: calc(100vh - 50px - env(safe-area-inset-bottom)); /* 同时考虑安全区域 */
+}
+
 /* 定位相关 */
 .fixed {
   position: fixed;
@@ -219,14 +225,6 @@ image {
   background-color: #000000;
 }
 
-.bg-\[f6f6f6\] {
-  background-color: #f6f6f6;
-}
-
-.bg-\[f5f5f5\] {
-  background-color: #f5f5f5;
-}
-
 .bg-gray-50 {
   background-color: #f9fafb;
 }
@@ -255,10 +253,6 @@ image {
   background-color: #a9c2a4;
 }
 
-.bg-white\/80 {
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
 .bg-\[ff4d4f\] {
   background-color: #ff4d4f;
 }
@@ -273,10 +267,6 @@ image {
 
 .bg-\[d4bfa3\] {
   background-color: #d4bfa3;
-}
-
-.bg-\[rgba\(30\,30\,30\,0\.92\)\] {
-  background-color: rgba(30, 30, 30, 0.92);
 }
 
 /* 边框相关 */
@@ -799,32 +789,43 @@ image {
   padding-top: 44rpx; /* 默认值，实际项目中应该动态获取 */
 }
 
+/* 固定头部区域 */
+.header-fixed {
+  box-sizing: border-box;
+}
+
+/* 头部占位符，防止内容被固定头部遮挡 */
+.header-placeholder {
+  flex-shrink: 0;
+  width: 100%;
+}
+
 /* 购物车相关样式 */
 .cart-overlay {
   position: fixed;
   left: 0;
   right: 0;
   top: 0;
+  bottom: 50px; /* 避免覆盖tabbar */
   z-index: 40;
   background-color: rgba(0, 0, 0, 0.6);
   transition: opacity 0.3s ease;
-  bottom: 100rpx; /* 50px */
 }
 
 .cart-container {
   position: fixed;
   left: 0;
   right: 0;
+  bottom: 50px; /* 悬浮在tabbar上方 */
   z-index: 50;
   display: flex;
   flex-direction: column;
   padding-bottom: env(safe-area-inset-bottom);
-  transition: opacity 0.2s ease;
-  bottom: 100rpx; /* 50px */
 }
 
 .cart-container.bg-white {
   background-color: #ffffff;
+  isolation: isolate;
 }
 
 .cart-container.bg-transparent {
@@ -836,7 +837,6 @@ image {
   overflow: hidden;
   border-radius: 48rpx 48rpx 0 0;
   background-color: #ffffff;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .cart-button {
@@ -847,7 +847,7 @@ image {
   align-items: center;
   overflow: hidden;
   border-radius: 48rpx;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
   transition: all 0.2s ease;
   margin: 0 32rpx 32rpx;
   width: calc(100% - 64rpx);
@@ -860,6 +860,7 @@ image {
 
 .cart-button.bg-dark {
   background-color: #2a2a2a;
+  background-image: linear-gradient(180deg, #2a2a2a 0%, #2a2a2a 100%);
 }
 
 .cart-button:active {
