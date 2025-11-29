@@ -39,9 +39,26 @@ image {
 }
 
 /* 页面容器高度，考虑tabbar高度 */
-.box-container {
+.order-page {
+  position: relative;
   height: calc(100vh - 50px); /* 减去tabbar的50px高度 */
   height: calc(100vh - 50px - env(safe-area-inset-bottom)); /* 同时考虑安全区域 */
+  overflow: hidden; /* 禁止外层容器滚动 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 头部区域 */
+.header-area {
+  z-index: 20;
+  flex-shrink: 0; /* 头部不缩放 */
+}
+
+/* 内容区域，占据除头部外的剩余空间 */
+.content-area {
+  flex: 1; /* 占据剩余空间 */
+  overflow: hidden; /* 内容区域溢出隐藏 */
+  display: flex;
 }
 
 /* 定位相关 */
@@ -778,6 +795,10 @@ image {
 
 .top-0 {
   top: 0;
+}
+
+.top-\[12px\] {
+  top: 24rpx;
 }
 
 .top-1\/2 {

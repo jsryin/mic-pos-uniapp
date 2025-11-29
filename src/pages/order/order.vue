@@ -10,6 +10,7 @@ definePage({
   style: {
     navigationBarTitleText: '%pages.order%',
     navigationStyle: 'custom',
+    disableScroll: true, // 禁用页面默认滚动
   },
 })
 
@@ -33,10 +34,15 @@ const { showLoginPopup, showLogin } = useLoginPopup()
 
 const tags = ['指定商品特价39.9元起', '2大杯减5元', '3大杯减8元', '4大杯减12元']
 const currentCateId = ref(2)
-const scrollTop = ref(0)
+const scrollIntoViewId = ref('')
+const leftScrollIntoViewId = ref('')
+const lastScrolledCategoryId = ref<number | null>(null) // 跟踪上次滚动的分类ID
 const loading = ref(false)
 const categories = ref<Category[]>([])
 const productGroups = ref<ProductGroup[]>([])
+
+// 是否正在通过点击改变滚动位置，避免循环触发
+const isClickScrolling = ref(false)
 
 // --- Computed Properties for Cart ---
 
@@ -86,14 +92,123 @@ async function loadProducts() {
 
 onMounted(async () => {
   await Promise.all([loadCategories(), loadProducts()])
+  // 初始化跟踪的分类ID
+  lastScrolledCategoryId.value = currentCateId.value
 })
 
 // --- Logic: Main Page ---
 
+// 处理左侧分类点击
 function handleCategoryClick(id: number) {
+  // 防止点击同一个分类时重复触发
+  if (currentCateId.value === id) {
+    return
+  }
+
+  // 标记正在点击滚动，避免滚动监听干扰
+  isClickScrolling.value = true
   currentCateId.value = id
-  scrollTop.value = scrollTop.value === 0 ? 1 : 0
+  lastScrolledCategoryId.value = id // 更新跟踪的分类ID
+
+  // 设置目标位置为分类空白行，这样第一个商品会自然显示在粘性标题下方
+  // 这样避免了复杂的滚动计算，简单有效
+  scrollIntoViewId.value = `category-head-${id}`
+
+  // 滚动完成后重置状态
+  setTimeout(() => {
+    scrollIntoViewId.value = ''
+    isClickScrolling.value = false
+  }, 800)
 }
+
+// 防抖函数
+function debounce(func: (...args: any[]) => void, delay: number) {
+  let timeoutId: any
+  return function (...args: any[]) {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func(...args), delay)
+  }
+}
+
+// 获取当前可见的分类（简化版本）
+function getCurrentVisibleCategory() {
+  const query = uni.createSelectorQuery()
+
+  // 查询所有分类标题的位置
+  categories.value.forEach((category) => {
+    query.select(`#category-${category.id}`).boundingClientRect()
+  })
+
+  // 查询滚动容器的位置
+  query.select('.scroll-content').boundingClientRect()
+
+  query.exec((res: any[]) => {
+    if (!res || res.length < categories.value.length + 1)
+      return
+
+    const containerRect = res[res.length - 1] // 最后一个结果是容器
+    if (!containerRect)
+      return
+
+    // 找到第一个在视口中可见的分类标题
+    let currentVisibleCategoryId = null
+    const viewportTop = 50 // 视口顶部50px范围内
+    let hasVisibleCategory = false
+
+    for (let i = 0; i < categories.value.length; i++) {
+      const categoryRect = res[i]
+      if (!categoryRect)
+        continue
+
+      const category = categories.value[i]
+
+      // 检查分类标题是否在视口顶部附近（考虑容器的相对位置）
+      const relativeTop = categoryRect.top - containerRect.top
+
+      // 如果分类标题在视口顶部附近
+      if (relativeTop >= -20 && relativeTop <= viewportTop) {
+        currentVisibleCategoryId = category.id
+        hasVisibleCategory = true
+        break
+      }
+    }
+
+    // 如果没有找到合适的分类（比如在顶部横幅区域），选择第一个分类
+    if (!hasVisibleCategory && categories.value.length > 0) {
+      currentVisibleCategoryId = categories.value[0].id
+    }
+
+    // 更新当前分类
+    if (currentVisibleCategoryId !== currentCateId.value) {
+      currentCateId.value = currentVisibleCategoryId
+
+      // 只有当分类真正变化且不是同一个分类时才滚动左侧
+      if (!isClickScrolling.value && currentVisibleCategoryId !== lastScrolledCategoryId.value) {
+        leftScrollIntoViewId.value = `left-category-${currentVisibleCategoryId}`
+        lastScrolledCategoryId.value = currentVisibleCategoryId
+
+        // 滚动完成后重置
+        setTimeout(() => {
+          leftScrollIntoViewId.value = ''
+        }, 300)
+      }
+    }
+  })
+}
+
+// 使用防抖的滚动监听
+const handleRightScroll = debounce(() => {
+  // 如果正在点击滚动，不触发滚动监听，避免循环
+  if (isClickScrolling.value) {
+    return
+  }
+
+  if (!categories.value.length || !productGroups.value.length) {
+    return
+  }
+
+  getCurrentVisibleCategory()
+}, 150) // 150ms 防抖
 
 // 添加到购物车 (主页面列表点击)
 function handleAddToCart(product: any) {
@@ -192,66 +307,68 @@ const handleCheckout = withLoginCheck(() => {
 </script>
 
 <template>
-  <view class="box-container flex flex-col overflow-hidden text-[#333] font-sans">
+  <view class="order-page text-[#333] font-sans">
     <!-- 固定顶部头部区域 -->
-    <view class="header-fixed pt-status-bar fixed left-0 right-0 top-0 z-20 bg-white pb-2 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-      <view class="mt-2 flex items-center justify-between px-4 py-2">
-        <view class="flex items-baseline gap-4">
-          <view class="relative flex flex-col items-center">
-            <text class="text-[18px] text-black font-bold leading-none">堂食</text>
-            <view class="mt-1 h-[3px] w-5 rounded-full bg-black" />
+    <view class="header-area pt-status-bar bg-white">
+      <view class="header-content pb-2 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <view class="mt-2 flex items-center justify-between px-4 py-2">
+          <view class="flex items-baseline gap-4">
+            <view class="relative flex flex-col items-center">
+              <text class="text-[18px] text-black font-bold leading-none">堂食</text>
+              <view class="mt-1 h-[3px] w-5 rounded-full bg-black" />
+            </view>
+            <text class="text-[16px] text-gray-400 font-medium leading-none transition-colors hover:text-gray-600">外卖</text>
           </view>
-          <text class="text-[16px] text-gray-400 font-medium leading-none transition-colors hover:text-gray-600">外卖</text>
-        </view>
-        <view class="flex items-center gap-3">
-          <view class="h-8 w-8 flex items-center justify-center rounded-full bg-[#f5f5f5]">
-            <wd-icon name="search" size="18px" color="#333" />
-          </view>
-        </view>
-      </view>
-
-      <view class="mt-2 flex justify-between px-4">
-        <view class="flex-1 pr-4">
-          <view class="mb-1 flex items-center text-[17px] text-black font-bold">
-            <wd-icon name="star-filled" size="16px" color="#999" custom-class="mr-1" />
-            <text class="max-w-[220px] truncate">广东深圳南山茂业百货店</text>
-            <wd-icon name="arrow-right" size="14px" color="#999" custom-class="ml-1" />
-          </view>
-          <view class="flex items-center gap-2 text-[11px]">
-            <view class="flex items-center text-gray-500">
-              <wd-icon name="location" size="10px" custom-class="mr-0.5" />
-              距您569m
+          <view class="flex items-center gap-3">
+            <view class="h-8 w-8 flex items-center justify-center rounded-full bg-[#f5f5f5]">
+              <wd-icon name="search" size="18px" color="#333" />
             </view>
           </view>
         </view>
-      </view>
 
-      <view class="mt-3 px-4">
-        <scroll-view scroll-x class="no-scrollbar w-full whitespace-nowrap" :show-scrollbar="false">
-          <view class="inline-flex gap-2 pb-1">
-            <view v-for="(tag, idx) in tags" :key="idx" class="border border-[#f2dcb8] rounded-[4px] bg-[#fffbf5] px-2 py-[2px] text-[10px] text-[#d48a38]">
-              {{ tag }}
+        <view class="mt-2 flex justify-between px-4">
+          <view class="flex-1 pr-4">
+            <view class="mb-1 flex items-center text-[17px] text-black font-bold">
+              <wd-icon name="star-filled" size="16px" color="#999" custom-class="mr-1" />
+              <text class="max-w-[220px] truncate">广东深圳南山茂业百货店</text>
+              <wd-icon name="arrow-right" size="14px" color="#999" custom-class="ml-1" />
+            </view>
+            <view class="flex items-center gap-2 text-[11px]">
+              <view class="flex items-center text-gray-500">
+                <wd-icon name="location" size="10px" custom-class="mr-0.5" />
+                距您569m
+              </view>
             </view>
           </view>
-        </scroll-view>
+        </view>
+
+        <view class="mt-3 px-4">
+          <scroll-view scroll-x class="no-scrollbar w-full whitespace-nowrap" :show-scrollbar="false">
+            <view class="inline-flex gap-2 pb-1">
+              <view v-for="(tag, idx) in tags" :key="idx" class="border border-[#f2dcb8] rounded-[4px] bg-[#fffbf5] px-2 py-[2px] text-[10px] text-[#d48a38]">
+                {{ tag }}
+              </view>
+            </view>
+          </scroll-view>
+        </view>
       </view>
     </view>
 
-    <!-- 添加头部高度占位，防止内容被固定头部遮挡 -->
-    <view class="header-placeholder" style="height: calc(44px + 16px + 30px + 16px + 20px + 8px);" />
-
-    <!-- 左右独立滚动区域 -->
-    <view class="flex flex-1 overflow-hidden">
+    <!-- 内容区域，占据头部外的剩余空间 -->
+    <view class="content-area">
       <!-- 左侧分类独立滚动 -->
       <scroll-view
         scroll-y
         class="h-full w-[90px] bg-[#f6f6f6]"
         :enhanced="true"
         :show-scrollbar="false"
+        :scroll-into-view="leftScrollIntoViewId"
+        :scroll-with-animation="true"
       >
         <view class="py-2">
           <view
             v-for="item in categories"
+            :id="`left-category-${item.id}`"
             :key="item.id"
             class="relative flex flex-col items-center justify-center px-2 py-5 transition-all duration-200"
             :class="currentCateId === item.id ? 'bg-white' : 'bg-[#f6f6f6]'"
@@ -272,10 +389,11 @@ const handleCheckout = withLoginCheck(() => {
       <!-- 右侧商品独立滚动 -->
       <scroll-view
         scroll-y
-        class="h-full flex-1 bg-white px-3"
-        :scroll-top="scrollTop"
+        class="scroll-content h-full flex-1 bg-white px-3"
+        :scroll-into-view="scrollIntoViewId"
         :scroll-with-animation="true"
         :enhanced="true"
+        @scroll="handleRightScroll"
       >
         <view class="pb-32 pt-3">
           <view class="relative mb-6 h-[140px] overflow-hidden rounded-xl shadow-sm">
@@ -290,10 +408,11 @@ const handleCheckout = withLoginCheck(() => {
           </view>
 
           <view v-for="group in productGroups" :key="group.id" class="mb-8">
-            <view class="sticky top-0 z-10 mb-3 bg-white py-1 text-[13px] text-gray-800 font-bold">
+            <view :id="`category-head-${group.id}`" class="mb-1" />
+            <view :id="`category-${group.id}`" class="sticky top-[0px] z-10 mb-6 bg-white py-1 text-[13px] text-gray-800 font-bold">
               {{ group.name }}
             </view>
-            <view v-for="item in group.items" :key="item.id" class="mb-6 flex">
+            <view v-for="item in group.items" :id="`product-${item.id}`" :key="item.id" class="mb-6 flex">
               <view class="relative h-[96px] w-[96px] shrink-0 overflow-hidden rounded-lg bg-gray-100">
                 <image :src="item.image" class="h-full w-full object-cover" mode="aspectFill" />
               </view>
