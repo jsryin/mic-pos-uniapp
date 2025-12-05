@@ -69,6 +69,7 @@ export const mockGenerators = {
             price: 48.6,
             image: 'https://images.unsplash.com/photo-1626202378538-072485e16d87?auto=format&fit=crop&w=200&q=80',
             badge: '特惠',
+            hasSpec: 1,
           },
           {
             id: 103,
@@ -145,6 +146,7 @@ export const mockGenerators = {
             price: 19.0,
             image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=200&q=80',
             badge: '推荐',
+            hasSpec: 1,
           },
           {
             id: 302,
@@ -153,6 +155,7 @@ export const mockGenerators = {
             price: 17.0,
             image: 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cda9?auto=format&fit=crop&w=200&q=80',
             badge: '',
+            hasSpec: 1,
           },
           {
             id: 303,
@@ -329,6 +332,7 @@ export const mockGenerators = {
             price: 15.0,
             image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=200&q=80',
             badge: '经典',
+            hasSpec: 1,
           },
           {
             id: 702,

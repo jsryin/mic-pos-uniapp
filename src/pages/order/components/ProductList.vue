@@ -10,6 +10,7 @@ interface Props {
 interface Emits {
   (e: 'scroll', event: any): void
   (e: 'add-to-cart', product: any): void
+  (e: 'select-spec', product: any): void
 }
 
 defineProps<Props>()
@@ -21,6 +22,10 @@ function handleRightScroll(event: any) {
 
 function handleAddToCart(product: any) {
   emit('add-to-cart', product)
+}
+
+function handleSelectSpec(product: any) {
+  emit('select-spec', product)
 }
 </script>
 
@@ -63,6 +68,7 @@ function handleAddToCart(product: any) {
           :key="item.id"
           :item="item"
           @add-to-cart="handleAddToCart"
+          @select-spec="handleSelectSpec"
         />
       </view>
     </view>

@@ -5,6 +5,7 @@ export interface Product {
   desc: string
   price: string | number
   image: string
+  hasSpec?: number // 是否需要选择规格，0=直接添加，1=选规格
 }
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 
 interface Emits {
   (e: 'add-to-cart', product: Product): void
+  (e: 'select-spec', product: Product): void
 }
 
 defineProps<Props>()
@@ -20,6 +22,10 @@ const emit = defineEmits<Emits>()
 
 function handleAddToCart(product: Product) {
   emit('add-to-cart', product)
+}
+
+function handleSelectSpec(product: Product) {
+  emit('select-spec', product)
 }
 </script>
 
@@ -45,8 +51,16 @@ function handleAddToCart(product: Product) {
           <text class="ml-0.5 text-[11px] text-gray-400 font-normal">起</text>
         </view>
 
-        <!-- 添加按钮 -->
+        <!-- 操作按钮 -->
         <view
+          v-if="item.hasSpec === 1"
+          class="h-[26px] flex items-center justify-center rounded-full bg-[#BA9257] px-3 shadow-md transition-transform active:scale-95"
+          @click="handleSelectSpec(item)"
+        >
+          <text class="text-[11px] text-white font-medium">选规格</text>
+        </view>
+        <view
+          v-else
           class="h-[26px] w-[26px] flex items-center justify-center rounded-full bg-[#BA9257] shadow-md transition-transform active:scale-95"
           @click="handleAddToCart(item)"
         >

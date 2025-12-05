@@ -16,6 +16,7 @@ export interface Product {
   price: number
   image: string
   badge: string
+  hasSpec?: number // 是否需要选择规格，0=直接添加，1=选规格，默认为0
 }
 
 // 商品分组接口类型

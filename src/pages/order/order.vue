@@ -8,6 +8,7 @@ import { useTokenStore } from '@/store/token'
 import CategorySidebar from './components/CategorySidebar.vue'
 import OrderHeader from './components/OrderHeader.vue'
 import ProductList from './components/ProductList.vue'
+import ProductSpecSelector from './components/ProductSpecSelector.vue'
 import ShoppingCart from './components/ShoppingCart.vue'
 import '@/pages/order/styles/order.scss'
 
@@ -34,6 +35,10 @@ const lastScrolledCategoryId = ref<number | null>(null) // 跟踪上次滚动的
 const loading = ref(false)
 const categories = ref<Category[]>([])
 const productGroups = ref<ProductGroup[]>([])
+
+// 规格选择相关状态
+const showSpecSelector = ref(false)
+const currentProduct = ref<any>(null)
 
 // 是否正在通过点击改变滚动位置，避免循环触发
 const isClickScrolling = ref(false)
@@ -211,6 +216,55 @@ function handleAddToCart(product: any) {
   })
 }
 
+// 选择规格
+function handleSelectSpec(product: any) {
+  currentProduct.value = product
+  showSpecSelector.value = true
+}
+
+// 规格选择确认
+function handleSpecConfirm(spec: { base: string, temp: string, sugar: string }) {
+  // 构建带规格的商品信息
+  const specText = `${spec.base},${spec.temp},${spec.sugar}`
+  const productName = `${currentProduct.value.title}(${specText})`
+
+  // 添加到购物车
+  const existingItem = cartItems.value.find(item =>
+    item.id === currentProduct.value.id && item.desc === specText,
+  )
+
+  if (existingItem) {
+    existingItem.quantity++
+  }
+  else {
+    cartItems.value.push({
+      id: currentProduct.value.id,
+      name: productName,
+      price: Number(currentProduct.value.price),
+      quantity: 1,
+      image: currentProduct.value.image,
+      selected: true,
+      desc: specText,
+    })
+  }
+
+  uni.showToast({
+    title: '已加入购物袋',
+    icon: 'none',
+    duration: 1500,
+  })
+
+  // 关闭弹窗
+  showSpecSelector.value = false
+  currentProduct.value = null
+}
+
+// 规格选择关闭
+function handleSpecClose() {
+  showSpecSelector.value = false
+  currentProduct.value = null
+}
+
 // --- Logic: Cart Panel ---
 
 // 切换面板展开/折叠
@@ -307,6 +361,7 @@ const handleCheckout = withLoginCheck(() => {
         :scroll-into-view-id="scrollIntoViewId"
         @scroll="handleRightScroll"
         @add-to-cart="handleAddToCart"
+        @select-spec="handleSelectSpec"
       />
     </view>
 
@@ -321,6 +376,19 @@ const handleCheckout = withLoginCheck(() => {
       @toggle-select-all="toggleSelectAll"
       @clear-cart="clearCart"
       @checkout="handleCheckout"
+    />
+
+    <!-- 规格选择弹窗 -->
+    <ProductSpecSelector
+      v-if="currentProduct"
+      v-model:visible="showSpecSelector"
+      :product-name="currentProduct.title"
+      :product-image="currentProduct.image"
+      :description="currentProduct.desc"
+      :calories="currentProduct.calories"
+      :low-gi="currentProduct.lowGI"
+      @close="handleSpecClose"
+      @confirm="handleSpecConfirm"
     />
 
     <LoginPopup v-model="showLoginPopup" />
