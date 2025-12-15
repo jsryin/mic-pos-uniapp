@@ -3,8 +3,7 @@ import type { CartItem } from './components/ShoppingCart.vue'
 import type { Category, ProductGroup } from '@/api/product'
 import { onMounted, ref } from 'vue'
 import { getCategories, getProductGroups } from '@/api/product'
-import { useLoginPopup, withLoginCheck } from '@/hooks/useLoginPopup'
-import { useTokenStore } from '@/store/token'
+// 去结算不需要登录，已移除登录相关导入
 import CategorySidebar from './components/CategorySidebar.vue'
 import OrderHeader from './components/OrderHeader.vue'
 import ProductList from './components/ProductList.vue'
@@ -23,9 +22,6 @@ definePage({
 // 购物车状态
 const cartItems = ref<CartItem[]>([])
 const isCartExpanded = ref(false) // 控制展开状态
-
-const tokenStore = useTokenStore()
-const { showLoginPopup, showLogin } = useLoginPopup()
 
 const tags = ['指定商品特价39.9元起', '2大杯减5元', '3大杯减8元', '4大杯减12元']
 const currentCateId = ref(2)
@@ -324,8 +320,8 @@ function clearCart() {
   })
 }
 
-// 去结算
-const handleCheckout = withLoginCheck(() => {
+// 去结算（不需要登录）
+function handleCheckout() {
   const totalQuantity = cartItems.value.reduce((sum, item) => sum + item.quantity, 0)
   const totalPrice = cartItems.value
     .filter(item => item.selected)
@@ -337,7 +333,7 @@ const handleCheckout = withLoginCheck(() => {
   }
   console.log('结算金额:', totalPrice)
   uni.showToast({ title: '准备结算', icon: 'success' })
-})
+}
 </script>
 
 <template>
@@ -391,7 +387,7 @@ const handleCheckout = withLoginCheck(() => {
       @confirm="handleSpecConfirm"
     />
 
-    <LoginPopup v-model="showLoginPopup" />
+    <!-- 登录弹窗已移除，结算不需要登录 -->
   </view>
 </template>
 

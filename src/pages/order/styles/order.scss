@@ -842,6 +842,8 @@ image {
   display: flex;
   flex-direction: column;
   padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden; /* 确保圆角生效 */
+  border-radius: 24rpx 24rpx 0 0; /* 添加圆角到容器 */
 }
 
 .cart-container.bg-white {

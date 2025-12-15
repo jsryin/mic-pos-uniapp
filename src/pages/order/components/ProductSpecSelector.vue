@@ -102,9 +102,9 @@ function handleBgClick() {
 
 <template>
   <div v-if="visible" class="fixed inset-0 z-50 flex items-end justify-center bg-black/50" @click="handleBgClick">
-    <div class="animate-slide-up max-h-[85vh] w-full flex flex-col rounded-t-3xl bg-white font-sans" @click.stop>
+    <div class="animate-slide-up max-h-[85vh] w-full flex flex-col rounded-[24rpx] bg-white font-sans" @click.stop>
       <div class="flex-1 overflow-y-auto pb-4">
-        <div class="relative h-64 w-full overflow-hidden bg-[#C8D3C5]">
+        <div class="relative h-64 w-full overflow-hidden rounded-t-[24rpx] bg-[#C8D3C5]">
           <image
             :src="productImage"
             mode="aspectFill"
