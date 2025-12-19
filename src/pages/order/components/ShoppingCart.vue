@@ -46,7 +46,7 @@ interface Emits {
   (e: 'toggle-item-select', item: CartItem): void
   (e: 'toggle-select-all'): void
   (e: 'clear-cart'): void
-  (e: 'checkout'): void
+  (e: 'order'): void
 }
 
 function toggleCartPanel() {
@@ -74,7 +74,7 @@ function clearCart() {
 }
 
 function handleCheckout() {
-  emit('checkout')
+  emit('order')
 }
 </script>
 

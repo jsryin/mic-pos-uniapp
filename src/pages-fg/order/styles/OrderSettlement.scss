@@ -1,0 +1,570 @@
+.order-page {
+  position: relative;
+  height: 95vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+
+  &.page-no-scroll {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+// 可滚动内容区域
+.content-scrollable {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: #f5f5f5;
+}
+
+// 内容容器
+.inner-content {
+  // 关键：利用 padding-bottom 为底部固定区域留出空间
+  // 计算方式：底部区域高度(136rpx) + 安全区域高度 + 额外间距(16rpx)
+  padding-bottom: calc(136rpx + env(safe-area-inset-bottom) + 16rpx);
+}
+
+// 门店信息和预约时间组合卡片
+.store-reservation-card {
+  background: white;
+  margin: 16rpx 20rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+// 门店信息区块
+.store-section {
+  padding: 28rpx 24rpx;
+
+  .store-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20rpx;
+
+    .store-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 16rpx;
+
+      .store-name {
+        font-size: 30rpx;
+        font-weight: 600;
+        color: #1a1a1a;
+        max-width: 400rpx;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .location-badge {
+        background: #f5f5f5;
+        color: #666;
+        font-size: 20rpx;
+        padding: 6rpx 12rpx;
+        border-radius: 8rpx;
+        white-space: nowrap;
+      }
+
+      .location-button {
+        width: 56rpx;
+        height: 56rpx;
+        background: #f5f5f5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .icon-location {
+          font-size: 28rpx;
+        }
+      }
+    }
+
+    .arrow-right {
+      font-size: 40rpx;
+      color: #999;
+      line-height: 1;
+      font-weight: 300;
+    }
+  }
+
+  .store-address {
+    display: flex;
+    align-items: flex-start;
+    gap: 8rpx;
+    margin-bottom: 20rpx;
+
+    .icon-pin {
+      font-size: 24rpx;
+      color: #999;
+      margin-top: 4rpx;
+    }
+
+    .address-text {
+      flex: 1;
+      font-size: 24rpx;
+      color: #999;
+      line-height: 1.5;
+    }
+  }
+
+  .store-status {
+    .status-text {
+      font-size: 22rpx;
+      color: #666;
+
+      .highlight {
+        color: #52c41a;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// 分隔线
+.divider {
+  height: 1rpx;
+  background-color: #f0f0f0;
+  margin: 0 24rpx;
+}
+
+// 预约时间
+.reservation-section {
+  padding: 28rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .reservation-label {
+    font-size: 28rpx;
+    color: #1a1a1a;
+  }
+
+  .reservation-value {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+
+    .value-text {
+      font-size: 28rpx;
+      color: #ff6b35;
+      font-weight: 500;
+    }
+
+    .arrow-right {
+      font-size: 36rpx;
+      color: #999;
+    }
+  }
+}
+
+// 商品、优惠券、价格汇总组合卡片
+.order-detail-card {
+  background: white;
+  margin: 0 20rpx 16rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+// 商品列表
+.products-section {
+  padding: 20rpx 24rpx;
+
+  .product-item {
+    display: flex;
+    gap: 24rpx;
+    padding: 20rpx 0;
+
+    .product-image {
+      width: 160rpx;
+      height: 160rpx;
+      border-radius: 12rpx;
+      flex-shrink: 0;
+    }
+
+    .product-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8rpx;
+
+      .product-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        .product-name {
+          font-size: 32rpx;
+          font-weight: 500;
+          color: #1a1a1a;
+        }
+
+        .product-price {
+          font-size: 32rpx;
+          font-weight: 500;
+          color: #1a1a1a;
+        }
+      }
+
+      .product-calories {
+        font-size: 24rpx;
+        color: #999;
+      }
+
+      .product-specs {
+        font-size: 24rpx;
+        color: #666;
+        line-height: 1.5;
+      }
+
+      .product-quantity {
+        font-size: 24rpx;
+        color: #999;
+        margin-top: auto;
+      }
+    }
+  }
+}
+
+// 优惠券
+.coupon-section {
+  padding: 28rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .coupon-left {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+
+    .coupon-icon {
+      width: 48rpx;
+      height: 48rpx;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+      border-radius: 8rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24rpx;
+      font-weight: 500;
+    }
+
+    .coupon-text {
+      font-size: 28rpx;
+      color: #1a1a1a;
+    }
+  }
+
+  .coupon-right {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+
+    .coupon-discount {
+      font-size: 28rpx;
+      color: #ff6b35;
+      font-weight: 500;
+    }
+
+    .arrow-right {
+      font-size: 36rpx;
+      color: #999;
+    }
+  }
+}
+
+// 价格汇总
+.price-summary {
+  padding: 28rpx 24rpx;
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16rpx;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.total {
+      font-weight: 500;
+
+      .price-label {
+        font-size: 32rpx;
+        color: #1a1a1a;
+      }
+
+      .price-value {
+        font-size: 36rpx;
+        color: #1a1a1a;
+      }
+    }
+
+    .price-label {
+      font-size: 28rpx;
+      color: #666;
+    }
+
+    .price-value {
+      font-size: 28rpx;
+      color: #1a1a1a;
+
+      &.discount {
+        color: #ff6b35;
+      }
+    }
+  }
+}
+
+// 预留电话和备注组合卡片
+.phone-note-card {
+  background: white;
+  margin: 0 20rpx 16rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+// 预留电话
+.phone-section {
+  padding: 28rpx 24rpx;
+  display: flex;
+  align-items: center;
+
+  .phone-label {
+    font-size: 28rpx;
+    color: #1a1a1a;
+    margin-right: 24rpx;
+    flex-shrink: 0;
+  }
+
+  .phone-input {
+    flex: 1;
+    font-size: 24rpx;
+    color: #1a1a1a;
+    height: 60rpx;
+    text-align: right;
+
+    &::placeholder {
+      color: #999;
+    }
+  }
+}
+
+// 备注
+.note-section {
+  padding: 28rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .note-label {
+    font-size: 28rpx;
+    color: #1a1a1a;
+  }
+
+  .note-right {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+
+    .note-placeholder {
+      font-size: 24rpx;
+      color: #999;
+    }
+
+    .note-text {
+      font-size: 24rpx;
+      color: #1a1a1a;
+      max-width: 400rpx;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .arrow-right {
+      font-size: 36rpx;
+      color: #999;
+    }
+  }
+}
+
+// 备注弹窗
+.note-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.note-popup {
+  width: 100%;
+  background: white;
+  border-radius: 24rpx 24rpx 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: slideUp 0.3s ease-out;
+
+  .note-popup-header {
+    padding: 32rpx 24rpx 24rpx;
+    border-bottom: 1rpx solid #f5f5f5;
+    text-align: center;
+
+    .note-popup-title {
+      font-size: 32rpx;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+  }
+
+  .note-popup-content {
+    padding: 24rpx;
+
+    .textarea-wrapper {
+      position: relative;
+      width: 100%;
+
+      .note-textarea {
+        width: 100%;
+        min-height: 240rpx;
+        background: #f5f5f5;
+        border-radius: 12rpx;
+        padding: 20rpx;
+        padding-bottom: 50rpx;
+        font-size: 28rpx;
+        color: #1a1a1a;
+        line-height: 1.5;
+        box-sizing: border-box;
+      }
+
+      .char-count {
+        position: absolute;
+        right: 20rpx;
+        bottom: 16rpx;
+        pointer-events: none;
+
+        .count-text {
+          font-size: 24rpx;
+          color: #999;
+        }
+      }
+    }
+  }
+
+  .note-popup-footer {
+    padding: 0 24rpx 24rpx;
+
+    .confirm-button {
+      width: 100%;
+      height: 88rpx;
+      background: linear-gradient(135deg, #c8955e 0%, #d4a574 100%);
+      border-radius: 44rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 32rpx;
+      font-weight: 500;
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+// 底部固定区域
+.bottom-fixed {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+// 底部结算栏
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+
+  .bottom-left {
+    flex: 1;
+
+    .bottom-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 16rpx;
+      margin-bottom: 8rpx;
+
+      .bottom-quantity {
+        font-size: 24rpx;
+        color: #666;
+      }
+
+      .bottom-label {
+        font-size: 24rpx;
+        color: #666;
+      }
+
+      .bottom-price {
+        font-size: 48rpx;
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+    }
+
+    .bottom-discount-row {
+      display: flex;
+      align-items: center;
+      gap: 8rpx;
+
+      .bottom-discount-label {
+        font-size: 22rpx;
+        color: #999;
+      }
+
+      .bottom-discount-value {
+        font-size: 22rpx;
+        color: #ff6b35;
+      }
+    }
+  }
+
+  .submit-button {
+    width: 240rpx;
+    height: 88rpx;
+    background: linear-gradient(135deg, #c8955e 0%, #d4a574 100%);
+    border-radius: 44rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 32rpx;
+    font-weight: 500;
+  }
+}

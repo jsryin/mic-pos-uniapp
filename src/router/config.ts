@@ -11,6 +11,7 @@ export const isNeedLoginMode = LOGIN_STRATEGY === LOGIN_STRATEGY_MAP.DEFAULT_NEE
 export const LOGIN_PAGE = '/pages-fg/login/login'
 export const REGISTER_PAGE = '/pages-fg/login/register'
 export const NOT_FOUND_PAGE = '/pages-fg/404/index'
+export const ORDER_PAGE = '/pages-fg/order/OrderSettlement'
 
 export const LOGIN_PAGE_LIST = [LOGIN_PAGE, REGISTER_PAGE]
 

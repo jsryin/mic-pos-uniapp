@@ -3,6 +3,7 @@ import type { CartItem } from './components/ShoppingCart.vue'
 import type { Category, ProductGroup } from '@/api/product'
 import { onMounted, ref } from 'vue'
 import { getCategories, getProductGroups } from '@/api/product'
+import { ORDER_PAGE } from '@/router/config'
 // 去结算不需要登录，已移除登录相关导入
 import CategorySidebar from './components/CategorySidebar.vue'
 import OrderHeader from './components/OrderHeader.vue'
@@ -331,8 +332,11 @@ function handleCheckout() {
     uni.showToast({ title: '购物车为空', icon: 'none' })
     return
   }
-  console.log('结算金额:', totalPrice)
-  uni.showToast({ title: '准备结算', icon: 'success' })
+
+  // 跳转到结算页面
+  uni.navigateTo({
+    url: ORDER_PAGE,
+  })
 }
 </script>
 
@@ -371,7 +375,7 @@ function handleCheckout() {
       @toggle-item-select="toggleItemSelect"
       @toggle-select-all="toggleSelectAll"
       @clear-cart="clearCart"
-      @checkout="handleCheckout"
+      @order="handleCheckout"
     />
 
     <!-- 规格选择弹窗 -->
