@@ -1,0 +1,58 @@
+name: Manual Deployment
+
+# 触发条件
+on:
+  workflow_dispatch: # 允许手动点击 "Run workflow" 触发
+    inputs:
+      branch:
+        description: '选择部署分支'
+        required: true
+        default: 'main'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 拉取代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      # 2. 安装 Node.js 并打包前端项目
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 根据你的项目调整版本
+      
+      - name: Build Project
+        run: |
+          npm install
+          npm run build # 生成 dist 目录
+
+      # 3. 部署到服务器特定目录 (使用 SCP)
+      - name: Copy files to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "dist/*"        # 打包后的文件夹
+          target: "/data/front/my-project" # 你的服务器目标目录
+          strip_components: 1     # 去掉 dist 这一层级，只传内容
+
+      # 4. 执行远程命令 (启动命令)
+      - name: Execute SSH Command
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /www/wwwroot/my-project
+            # 示例：如果是用 pm2 启动，或者重启 Nginx
+            # npm install --production
+            # pm2 restart my-app
+            echo "部署完成，正在执行启动命令..."
+            ls -la
